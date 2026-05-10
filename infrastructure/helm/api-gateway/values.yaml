@@ -1,0 +1,60 @@
+# Lastmile Gig - API Gateway Helm Values
+# Default values for development environment
+
+replicaCount: 2
+
+image:
+  repository: lmg/api-gateway
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+  metricsPort: 3001
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+livenessProbe:
+  httpGet:
+    path: /v1/health
+    port: 3000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /v1/ready
+    port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+env:
+  - name: NODE_ENV
+    value: "production"
+  - name: LMG_ENVIRONMENT
+    value: "production"
+
+annotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3001"
+  prometheus.io/path: "/metrics"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

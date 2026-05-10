@@ -44,6 +44,16 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | Wave 4 | Complete | Core Backend Scaffolds - NestJS Services (26 files) | 733 | 10,172 |
 | Wave 5 | Complete | Database Schema & Migration Foundation (10 files) | ~680 | ~10,852 |
 
+#### Session 2 (2026-05-10) - Infrastructure as Code (Terraform)
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Terraform Foundation + Terragrunt Multi-Env (9 files) | 439 | 11,291 |
+| Wave 2 | Complete | VPC + EKS + K8s Namespaces + Istio mTLS (8 files) | 614 | 11,905 |
+| Wave 3 | Complete | MSK Kafka + OpenSearch + S3 + IAM (11 files) | 582 | 12,487 |
+| Wave 4 | Complete | Route 53 + CloudFront + WAF + Monitoring (12 files) | 592 | 13,079 |
+| Wave 5 | Complete | SageMaker + Secrets Manager + Helm Charts (9 files) | ~450 | ~13,529 |
+
 ---
 
 ## Phase Group Progress
