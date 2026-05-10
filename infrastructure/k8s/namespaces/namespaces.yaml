@@ -1,0 +1,115 @@
+# =============================================================
+# Lastmile Gig - Kubernetes Namespace Structure
+# =============================================================
+# @see docs/specs/08_INFRASTRUCTURE_IaC.md - Section 3.1
+# =============================================================
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-core
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-drivers
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-fleet
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-storefronts
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-ai
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-blockchain
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-payments
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-comms
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-logistics
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-analytics
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-monitoring
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-ingress
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lmg-argocd
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vault
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig

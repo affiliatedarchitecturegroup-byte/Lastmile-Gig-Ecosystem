@@ -1,0 +1,91 @@
+# =============================================================
+# Lastmile Gig - Istio mTLS Configuration
+# =============================================================
+# Strict mTLS between all services in the mesh.
+# @see docs/specs/08_INFRASTRUCTURE_IaC.md - Section 3.2
+# =============================================================
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-strict-mtls
+  namespace: lmg-core
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-strict-mtls
+  namespace: lmg-drivers
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-strict-mtls
+  namespace: lmg-payments
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-strict-mtls
+  namespace: lmg-fleet
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-strict-mtls
+  namespace: lmg-storefronts
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-strict-mtls
+  namespace: lmg-ai
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-strict-mtls
+  namespace: lmg-blockchain
+spec:
+  mtls:
+    mode: STRICT
+---
+# Circuit breaker for payment service
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: payment-service-circuit-breaker
+  namespace: lmg-payments
+spec:
+  host: payment-service.lmg-payments.svc.cluster.local
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 50
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 1000
