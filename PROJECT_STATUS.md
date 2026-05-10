@@ -38,11 +38,11 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 
 | Wave | Status | Description | LoC Added | Cumulative LoC |
 |---|---|---|---|---|
-| Wave 1 | In Progress | Project Foundation & Governance Documents | - | - |
-| Wave 2 | Pending | Monorepo Scaffold + Base Configuration | - | - |
-| Wave 3 | Pending | Shared Types Library + Design System Tokens | - | - |
-| Wave 4 | Pending | Core Backend Scaffolds - NestJS Services | - | - |
-| Wave 5 | Pending | Database Schema & Migration Foundation | - | - |
+| Wave 1 | Complete | Project Foundation & Governance Documents (32 files) | 7,237 | 7,237 |
+| Wave 2 | Complete | Monorepo Scaffold + Base Configuration (41 files) | 816 | 8,053 |
+| Wave 3 | Complete | Shared Types Library + Design System Tokens (20 files) | 1,386 | 9,439 |
+| Wave 4 | Complete | Core Backend Scaffolds - NestJS Services (26 files) | 733 | 10,172 |
+| Wave 5 | Complete | Database Schema & Migration Foundation (10 files) | ~680 | ~10,852 |
 
 ---
 
@@ -125,7 +125,11 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 
 | PR # | Branch | Wave | Description | Status | LoC |
 |---|---|---|---|---|---|
-| - | - | - | - | - | - |
+| - | main (initial) | W1 | Governance docs + spec suite | Merged | 7,237 |
+| #1 | wave/p001-s1-w2/monorepo-scaffold | W2 | Nx monorepo + configs | Merged | 816 |
+| #2 | wave/p001-s1-w3/shared-types-design-tokens | W3 | Types, design tokens, utils | Merged | 1,386 |
+| #3 | wave/p001-s1-w4/backend-scaffolds | W4 | NestJS service scaffolds | Merged | 733 |
+| #4 | wave/p001-s1-w5/database-schemas | W5 | Database schemas + migrations | Pending | ~680 |
 
 ---
 
