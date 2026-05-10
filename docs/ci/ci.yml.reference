@@ -1,0 +1,171 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      typescript: ${{ steps.changes.outputs.typescript }}
+      python: ${{ steps.changes.outputs.python }}
+      go: ${{ steps.changes.outputs.go }}
+      rust: ${{ steps.changes.outputs.rust }}
+      java: ${{ steps.changes.outputs.java }}
+      elixir: ${{ steps.changes.outputs.elixir }}
+      terraform: ${{ steps.changes.outputs.terraform }}
+      solidity: ${{ steps.changes.outputs.solidity }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            typescript:
+              - 'apps/api-gateway/**'
+              - 'apps/svc-auth/**'
+              - 'apps/svc-orders/**'
+              - 'apps/svc-drivers/**'
+              - 'apps/svc-fleet/**'
+              - 'apps/svc-storefronts/**'
+              - 'apps/web-*/**'
+              - 'apps/dashboard-*/**'
+              - 'apps/mobile-*/**'
+              - 'libs/**'
+            python:
+              - 'apps/svc-ai/**'
+              - 'apps/svc-agents/**'
+              - 'apps/svc-analytics/**'
+            go:
+              - 'apps/svc-dispatch/**'
+            rust:
+              - 'apps/svc-blockchain/**'
+              - 'apps/svc-iot/**'
+            java:
+              - 'apps/svc-payments/**'
+              - 'apps/svc-logistics/**'
+            elixir:
+              - 'apps/svc-tracking/**'
+              - 'apps/svc-comms/**'
+            terraform:
+              - 'infrastructure/terraform/**'
+              - 'infrastructure/terragrunt/**'
+            solidity:
+              - 'contracts/**'
+
+  lint-typescript:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.typescript == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npx nx run-many --target=lint --all
+      - run: npx nx run-many --target=test --all
+
+  lint-python:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.python == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install ruff mypy pytest
+      - run: ruff check apps/svc-ai apps/svc-agents apps/svc-analytics
+      - run: mypy apps/svc-ai apps/svc-agents apps/svc-analytics
+
+  lint-go:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.go == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - run: cd apps/svc-dispatch && go vet ./...
+      - run: cd apps/svc-dispatch && go test ./...
+
+  lint-rust:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.rust == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - run: cd apps/svc-blockchain && cargo clippy -- -D warnings
+      - run: cd apps/svc-blockchain && cargo fmt -- --check
+      - run: cd apps/svc-blockchain && cargo test
+
+  lint-java:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.java == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - run: cd apps/svc-payments && mvn verify -q
+
+  terraform-validate:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.terraform == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: cd infrastructure/terraform && terraform fmt -check -recursive
+      - run: cd infrastructure/terraform && terraform validate
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: infrastructure/terraform
+          framework: terraform
+          soft_fail: false
+
+  smart-contract-tests:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.solidity == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: cd contracts/solidity && npm ci && npx hardhat test
+
+  loc-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check file size limit (1800 LoC hard cap)
+        run: |
+          echo "Checking all source files for 1800 LoC hard cap..."
+          VIOLATIONS=""
+          for f in $(find apps/ libs/ contracts/ -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.py' -o -name '*.go' -o -name '*.rs' -o -name '*.java' -o -name '*.ex' -o -name '*.exs' -o -name '*.sol' \) -not -path '*/node_modules/*' -not -path '*/dist/*' 2>/dev/null); do
+            LINES=$(wc -l < "$f")
+            if [ "$LINES" -gt 1800 ]; then
+              VIOLATIONS="$VIOLATIONS\n  $f: $LINES lines"
+            fi
+          done
+          if [ -n "$VIOLATIONS" ]; then
+            echo "ERROR: Files exceeding 1800 LoC hard cap:$VIOLATIONS"
+            exit 1
+          fi
+          echo "All files within 1800 LoC limit."
