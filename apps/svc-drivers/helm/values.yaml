@@ -1,0 +1,76 @@
+# Driver Service Helm Values
+# @see docs/specs/08_INFRASTRUCTURE_IaC.md
+
+replicaCount: 2
+
+image:
+  repository: lastmilegig/svc-drivers
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+fullnameOverride: "svc-drivers"
+
+serviceAccount:
+  create: true
+  name: "svc-drivers"
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "svc-drivers"
+
+service:
+  type: ClusterIP
+  port: 3002
+  targetPort: 3002
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+env:
+  - name: LMG_ENVIRONMENT
+    value: "production"
+  - name: LMG_PORT_DRIVER_SERVICE
+    value: "3002"
+
+envFrom:
+  - secretRef:
+      name: svc-drivers-secrets
+
+livenessProbe:
+  httpGet:
+    path: /v1/health
+    port: 3002
+  initialDelaySeconds: 10
+  periodSeconds: 30
+
+readinessProbe:
+  httpGet:
+    path: /v1/ready
+    port: 3002
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3002"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL

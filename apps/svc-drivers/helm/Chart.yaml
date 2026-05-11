@@ -1,0 +1,14 @@
+apiVersion: v2
+name: svc-drivers
+description: Lastmile Gig Driver Service - Registration, onboarding, fleet management
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - drivers
+  - onboarding
+  - fleet
+  - biometric
+maintainers:
+  - name: AAG DevOps
+    email: devops@aagais.co.za
