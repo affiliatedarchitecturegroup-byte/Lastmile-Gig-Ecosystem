@@ -1,0 +1,41 @@
+# ArgoCD Application - Auth Service
+# @see docs/specs/13_DEVOPS_CICD.md
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: svc-auth
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    module: auth
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: lastmile-gig
+  source:
+    repoURL: https://github.com/affiliatedarchitecturegroup-byte/Lastmile-Gig-Ecosystem.git
+    targetRevision: main
+    path: apps/svc-auth/helm
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: lmg-core
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10

@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Lastmile Gig Driver",
+    "slug": "lastmile-gig-driver",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "lmg-driver",
+    "platforms": ["android", "ios"],
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#0066FF"
+    },
+    "android": {
+      "package": "za.co.aagais.lastmilegig.driver",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0066FF"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "RECEIVE_BOOT_COMPLETED"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "za.co.aagais.lastmilegig.driver",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Lastmile Gig needs your location to match you with nearby deliveries.",
+        "NSLocationAlwaysUsageDescription": "Lastmile Gig needs background location for delivery tracking.",
+        "NSCameraUsageDescription": "Lastmile Gig needs camera access for delivery photo confirmation."
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-location",
+      "expo-notifications"
+    ]
+  }
+}
