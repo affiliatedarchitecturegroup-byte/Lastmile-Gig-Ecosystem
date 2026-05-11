@@ -1,0 +1,171 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Tempo Distributed Tracing Configuration
+# Phase: P036 | Tempo installation, trace storage configured
+# -------------------------------------------------------------------
+
+tempo-distributed:
+  enabled: true
+
+  # Global settings
+  global:
+    image:
+      registry: docker.io
+
+  # Tempo configuration
+  tempo:
+    # Trace retention
+    retention: 72h
+
+    # Multi-tenancy disabled for simplicity
+    multitenancyEnabled: false
+
+    # Receivers - accept traces from OTel Collector
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: "0.0.0.0:4317"
+          http:
+            endpoint: "0.0.0.0:4318"
+      jaeger:
+        protocols:
+          thrift_http:
+            endpoint: "0.0.0.0:14268"
+          grpc:
+            endpoint: "0.0.0.0:14250"
+      zipkin:
+        endpoint: "0.0.0.0:9411"
+
+    # Storage backend - S3
+    storage:
+      trace:
+        backend: s3
+        s3:
+          bucket: lmg-tempo-traces
+          endpoint: s3.af-south-1.amazonaws.com
+          region: af-south-1
+          forcepathstyle: false
+        wal:
+          path: /var/tempo/wal
+        block:
+          bloom_filter_false_positive: 0.05
+          v2_index_downsample_bytes: 1000
+          v2_encoding: zstd
+
+    # Metrics generator for RED metrics from traces
+    metricsGenerator:
+      enabled: true
+      remoteWriteUrl: http://lmg-prometheus-kube-prometheus-prometheus.lmg-monitoring:9090/api/v1/write
+      registry:
+        externalLabels:
+          source: tempo
+          cluster: lmg-production
+      processor:
+        service_graphs:
+          dimensions:
+            - service.namespace
+            - http.method
+            - http.status_code
+        span_metrics:
+          dimensions:
+            - service.namespace
+            - http.method
+            - http.status_code
+            - http.route
+
+  # Distributor
+  distributor:
+    replicas: 2
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+
+  # Ingester
+  ingester:
+    replicas: 3
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClass: gp3
+
+  # Query Frontend
+  queryFrontend:
+    replicas: 2
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+    query:
+      enabled: true
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+        limits:
+          cpu: "500m"
+          memory: "1Gi"
+
+  # Querier
+  querier:
+    replicas: 2
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+
+  # Compactor
+  compactor:
+    replicas: 1
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+
+  # Metrics Generator
+  metricsGenerator:
+    replicas: 1
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+
+  # Service account for S3 access via IRSA
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::role/lmg-tempo-s3-role
+
+  # Gateway
+  gateway:
+    enabled: true
+    replicas: 2
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"

@@ -1,0 +1,119 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Snyk Dependency Scanning
+# Phase: P052 | Snyk scan on every PR, blocks HIGH/CRITICAL
+# -------------------------------------------------------------------
+
+name: Security - Snyk Dependency Scan
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"  # Weekly Monday 06:00 UTC
+
+permissions:
+  contents: read
+  security-events: write
+
+env:
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+jobs:
+  snyk-node:
+    name: Snyk - Node.js Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci --prefer-offline
+
+      - name: Snyk test (Node.js)
+        uses: snyk/actions/node@master
+        continue-on-error: false
+        with:
+          args: >
+            --severity-threshold=high
+            --fail-on=all
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --project-name=lastmile-gig-node
+
+      - name: Snyk monitor (Node.js)
+        if: github.ref == 'refs/heads/main'
+        uses: snyk/actions/node@master
+        with:
+          command: monitor
+          args: --org=${{ secrets.SNYK_ORG_ID }} --project-name=lastmile-gig-node
+
+  snyk-python:
+    name: Snyk - Python Dependencies
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'lang:python') || github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: |
+          for req in apps/svc-ai/requirements.txt apps/svc-agents/requirements.txt apps/svc-analytics/requirements.txt; do
+            if [ -f "$req" ]; then pip install -r "$req"; fi
+          done
+
+      - name: Snyk test (Python)
+        uses: snyk/actions/python-3.10@master
+        with:
+          args: >
+            --severity-threshold=high
+            --fail-on=all
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --project-name=lastmile-gig-python
+
+  snyk-docker:
+    name: Snyk - Container Images
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - svc-auth
+          - svc-orders
+          - svc-drivers
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t lmg-${{ matrix.service }}:scan -f apps/${{ matrix.service }}/Dockerfile .
+
+      - name: Snyk container test
+        uses: snyk/actions/docker@master
+        with:
+          image: lmg-${{ matrix.service }}:scan
+          args: >
+            --severity-threshold=high
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --project-name=lastmile-gig-${{ matrix.service }}
+
+  snyk-iac:
+    name: Snyk - Infrastructure as Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Snyk IaC test
+        uses: snyk/actions/iac@master
+        with:
+          args: >
+            --severity-threshold=high
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --report
+          file: infrastructure/

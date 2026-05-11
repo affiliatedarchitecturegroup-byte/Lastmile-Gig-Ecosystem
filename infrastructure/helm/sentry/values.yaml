@@ -1,0 +1,258 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Sentry Configuration
+# Phase: P040 | Sentry project setup, DSNs for all services
+# -------------------------------------------------------------------
+
+# Sentry SDK configuration for all LMG services
+# Each service embeds its own Sentry SDK; this file documents DSN mapping
+# and shared configuration. DSNs are stored in Vault.
+
+sentry:
+  # Organisation configuration
+  organisation: lastmile-gig
+  url: https://sentry.internal.lastmilegig.aagais.co.za
+
+  # Global configuration applied to all SDKs
+  global:
+    environment: ${LMG_ENVIRONMENT}
+    release: ${LMG_RELEASE_VERSION}
+    sampleRate: 1.0
+    tracesSampleRate: 0.2
+    profilesSampleRate: 0.1
+    maxBreadcrumbs: 100
+    attachStacktrace: true
+    sendDefaultPii: false  # POPIA compliance - never send PII
+    beforeSend: "filterSensitiveData"  # Custom filter function name
+
+  # Project-to-DSN mapping (DSN values in Vault at secret/sentry/dsns/*)
+  projects:
+    # TypeScript/NestJS Services
+    - name: api-gateway
+      platform: node
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/api-gateway
+      team: platform
+      alertRules:
+        - type: issue_frequency
+          threshold: 50
+          interval: 1h
+          action: pagerduty
+
+    - name: svc-auth
+      platform: node
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/svc-auth
+      team: platform
+      alertRules:
+        - type: issue_frequency
+          threshold: 20
+          interval: 1h
+          action: pagerduty
+
+    - name: svc-drivers
+      platform: node
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/svc-drivers
+      team: drivers
+      alertRules:
+        - type: issue_frequency
+          threshold: 30
+          interval: 1h
+          action: pagerduty
+
+    - name: svc-orders
+      platform: node
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/svc-orders
+      team: orders
+      alertRules:
+        - type: issue_frequency
+          threshold: 30
+          interval: 1h
+          action: pagerduty
+
+    - name: svc-fleet
+      platform: node
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/svc-fleet
+      team: fleet
+      alertRules:
+        - type: issue_frequency
+          threshold: 20
+          interval: 1h
+          action: slack
+
+    - name: svc-storefronts
+      platform: node
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/svc-storefronts
+      team: storefronts
+      alertRules:
+        - type: issue_frequency
+          threshold: 30
+          interval: 1h
+          action: pagerduty
+
+    # Python/FastAPI Services
+    - name: svc-ai
+      platform: python
+      language: python
+      dsn_vault_path: secret/sentry/dsns/svc-ai
+      team: ai
+      alertRules:
+        - type: issue_frequency
+          threshold: 20
+          interval: 1h
+          action: slack
+
+    - name: svc-agents
+      platform: python
+      language: python
+      dsn_vault_path: secret/sentry/dsns/svc-agents
+      team: ai
+      alertRules:
+        - type: issue_frequency
+          threshold: 20
+          interval: 1h
+          action: slack
+
+    - name: svc-analytics
+      platform: python
+      language: python
+      dsn_vault_path: secret/sentry/dsns/svc-analytics
+      team: ai
+      alertRules:
+        - type: issue_frequency
+          threshold: 10
+          interval: 1h
+          action: slack
+
+    # Go Services
+    - name: svc-dispatch
+      platform: go
+      language: go
+      dsn_vault_path: secret/sentry/dsns/svc-dispatch
+      team: dispatch
+      alertRules:
+        - type: issue_frequency
+          threshold: 10
+          interval: 1h
+          action: pagerduty
+
+    # Rust Services
+    - name: svc-blockchain
+      platform: rust
+      language: rust
+      dsn_vault_path: secret/sentry/dsns/svc-blockchain
+      team: blockchain
+      alertRules:
+        - type: issue_frequency
+          threshold: 5
+          interval: 1h
+          action: pagerduty
+
+    - name: svc-iot
+      platform: rust
+      language: rust
+      dsn_vault_path: secret/sentry/dsns/svc-iot
+      team: fleet
+      alertRules:
+        - type: issue_frequency
+          threshold: 10
+          interval: 1h
+          action: slack
+
+    # Java/Spring Boot Services
+    - name: svc-payments
+      platform: java
+      language: java
+      dsn_vault_path: secret/sentry/dsns/svc-payments
+      team: finance
+      alertRules:
+        - type: issue_frequency
+          threshold: 5
+          interval: 1h
+          action: pagerduty
+
+    - name: svc-logistics
+      platform: java
+      language: java
+      dsn_vault_path: secret/sentry/dsns/svc-logistics
+      team: logistics
+      alertRules:
+        - type: issue_frequency
+          threshold: 15
+          interval: 1h
+          action: slack
+
+    # Elixir/Phoenix Services
+    - name: svc-tracking
+      platform: elixir
+      language: elixir
+      dsn_vault_path: secret/sentry/dsns/svc-tracking
+      team: tracking
+      alertRules:
+        - type: issue_frequency
+          threshold: 20
+          interval: 1h
+          action: pagerduty
+
+    - name: svc-comms
+      platform: elixir
+      language: elixir
+      dsn_vault_path: secret/sentry/dsns/svc-comms
+      team: comms
+      alertRules:
+        - type: issue_frequency
+          threshold: 15
+          interval: 1h
+          action: slack
+
+    # Frontend Applications
+    - name: web-corporate
+      platform: javascript-nextjs
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/web-corporate
+      team: frontend
+
+    - name: web-customer
+      platform: javascript-nextjs
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/web-customer
+      team: frontend
+
+    - name: web-storefronts
+      platform: javascript-nextjs
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/web-storefronts
+      team: frontend
+
+    - name: dashboard-ops
+      platform: javascript-angular
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/dashboard-ops
+      team: frontend
+
+    - name: dashboard-admin
+      platform: javascript-angular
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/dashboard-admin
+      team: frontend
+
+    - name: dashboard-command
+      platform: javascript-angular
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/dashboard-command
+      team: frontend
+
+    - name: mobile-customer
+      platform: react-native
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/mobile-customer
+      team: mobile
+
+    - name: mobile-driver
+      platform: react-native
+      language: typescript
+      dsn_vault_path: secret/sentry/dsns/mobile-driver
+      team: mobile

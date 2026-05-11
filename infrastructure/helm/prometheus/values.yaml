@@ -1,0 +1,191 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Prometheus Stack Configuration
+# Phase: P031-P032 | Observability Foundation
+# -------------------------------------------------------------------
+
+kube-prometheus-stack:
+  enabled: true
+
+  # -- Prometheus Server Configuration
+  prometheus:
+    prometheusSpec:
+      replicas: 2
+      retention: 15d
+      retentionSize: "50GB"
+      scrapeInterval: "15s"
+      evaluationInterval: "15s"
+
+      # Resource limits for af-south-1 cost optimisation
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "2Gi"
+        limits:
+          cpu: "2000m"
+          memory: "8Gi"
+
+      # Persistent storage for metrics
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp3
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 100Gi
+
+      # ServiceMonitor selector - matches all LMG namespaces
+      serviceMonitorSelector:
+        matchLabels:
+          monitoring: lmg-platform
+
+      serviceMonitorNamespaceSelector:
+        matchLabels:
+          monitoring-enabled: "true"
+
+      # PodMonitor selector for sidecar-less pods
+      podMonitorSelector:
+        matchLabels:
+          monitoring: lmg-platform
+
+      # Additional scrape configs for external targets
+      additionalScrapeConfigs:
+        - job_name: "istio-mesh"
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - istio-system
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_name]
+              regex: "istio-telemetry"
+              action: keep
+
+    # Ingress for Prometheus UI (internal only)
+    ingress:
+      enabled: true
+      ingressClassName: istio
+      annotations:
+        kubernetes.io/tls-acme: "true"
+      hosts:
+        - prometheus.internal.lastmilegig.aagais.co.za
+      tls:
+        - secretName: prometheus-tls
+          hosts:
+            - prometheus.internal.lastmilegig.aagais.co.za
+
+  # -- Alertmanager Configuration
+  alertmanager:
+    alertmanagerSpec:
+      replicas: 2
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp3
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi
+
+    config:
+      global:
+        resolve_timeout: 5m
+        slack_api_url: ""  # Set via Vault secret
+
+      route:
+        group_by: ["alertname", "namespace", "service"]
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h
+        receiver: "default-receiver"
+        routes:
+          - match:
+              severity: critical
+            receiver: "pagerduty-critical"
+            group_wait: 10s
+            repeat_interval: 1h
+          - match:
+              severity: warning
+            receiver: "pagerduty-warning"
+            repeat_interval: 4h
+          - match:
+              alertname: Watchdog
+            receiver: "null"
+
+      receivers:
+        - name: "null"
+        - name: "default-receiver"
+          webhook_configs:
+            - url: "http://alertmanager-webhook:9095/webhook"
+              send_resolved: true
+        - name: "pagerduty-critical"
+          pagerduty_configs:
+            - routing_key: ""  # Set via Vault secret
+              severity: critical
+              description: '{{ template "pagerduty.default.description" . }}'
+        - name: "pagerduty-warning"
+          pagerduty_configs:
+            - routing_key: ""  # Set via Vault secret
+              severity: warning
+
+  # -- Grafana sub-chart disabled (separate Helm chart)
+  grafana:
+    enabled: false
+
+  # -- Node Exporter
+  nodeExporter:
+    enabled: true
+
+  # -- Kube State Metrics
+  kubeStateMetrics:
+    enabled: true
+
+  # -- Prometheus Operator
+  prometheusOperator:
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+
+  # -- Default PrometheusRules
+  defaultRules:
+    create: true
+    rules:
+      alertmanager: true
+      etcd: true
+      configReloaders: true
+      general: true
+      k8s: true
+      kubeApiserverAvailability: true
+      kubeApiserverBurnrate: true
+      kubeApiserverHistogram: true
+      kubeApiserverSlos: true
+      kubeControllerManager: true
+      kubelet: true
+      kubeProxy: true
+      kubePrometheusGeneral: true
+      kubePrometheusNodeRecording: true
+      kubernetesApps: true
+      kubernetesResources: true
+      kubernetesStorage: true
+      kubernetesSystem: true
+      kubeSchedulerAlerting: true
+      kubeSchedulerRecording: true
+      kubeStateMetrics: true
+      network: true
+      node: true
+      nodeExporterAlerting: true
+      nodeExporterRecording: true
+      prometheus: true
+      prometheusOperator: true

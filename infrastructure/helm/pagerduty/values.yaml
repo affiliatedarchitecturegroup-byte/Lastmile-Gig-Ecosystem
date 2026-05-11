@@ -1,0 +1,208 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - PagerDuty Configuration
+# Phase: P042-P043 | PagerDuty services, escalation policies, alert rules
+# -------------------------------------------------------------------
+
+# PagerDuty service and escalation configuration
+# Actual integration is via Grafana Alerting + Prometheus Alertmanager
+# This file documents the PagerDuty service structure
+
+pagerduty:
+  # Integration keys stored in Vault
+  integrationKeyVaultPath: secret/pagerduty/integration-keys
+
+  # Service definitions
+  services:
+    - name: lmg-platform-critical
+      description: "Critical platform alerts - API Gateway, Auth, Core Services"
+      urgency: high
+      escalationPolicy: platform-critical
+      integrations:
+        - type: prometheus-alertmanager
+        - type: grafana-alerting
+        - type: datadog
+
+    - name: lmg-orders-dispatch
+      description: "Order processing and dispatch engine alerts"
+      urgency: high
+      escalationPolicy: operations-critical
+      integrations:
+        - type: prometheus-alertmanager
+        - type: grafana-alerting
+
+    - name: lmg-payments
+      description: "Payment gateway and financial service alerts"
+      urgency: high
+      escalationPolicy: finance-critical
+      integrations:
+        - type: prometheus-alertmanager
+        - type: grafana-alerting
+
+    - name: lmg-drivers
+      description: "Driver ecosystem and fleet alerts"
+      urgency: high
+      escalationPolicy: operations-standard
+      integrations:
+        - type: prometheus-alertmanager
+
+    - name: lmg-infrastructure
+      description: "EKS, Kafka, database, and network alerts"
+      urgency: high
+      escalationPolicy: platform-critical
+      integrations:
+        - type: prometheus-alertmanager
+        - type: datadog
+        - type: cloudwatch
+
+    - name: lmg-blockchain
+      description: "Blockchain and smart contract alerts"
+      urgency: low
+      escalationPolicy: platform-standard
+      integrations:
+        - type: prometheus-alertmanager
+
+    - name: lmg-ai-services
+      description: "AI inference, agents, and ML pipeline alerts"
+      urgency: low
+      escalationPolicy: ai-team
+      integrations:
+        - type: prometheus-alertmanager
+
+  # Escalation policies
+  escalationPolicies:
+    - name: platform-critical
+      description: "Critical platform issues - 5 min response"
+      rules:
+        - escalationDelayMinutes: 5
+          targets:
+            - type: on-call-schedule
+              id: platform-primary
+        - escalationDelayMinutes: 15
+          targets:
+            - type: on-call-schedule
+              id: platform-secondary
+        - escalationDelayMinutes: 30
+          targets:
+            - type: user
+              id: engineering-lead
+
+    - name: operations-critical
+      description: "Critical operations issues - 5 min response"
+      rules:
+        - escalationDelayMinutes: 5
+          targets:
+            - type: on-call-schedule
+              id: ops-primary
+        - escalationDelayMinutes: 15
+          targets:
+            - type: on-call-schedule
+              id: ops-secondary
+        - escalationDelayMinutes: 30
+          targets:
+            - type: user
+              id: ops-manager
+
+    - name: finance-critical
+      description: "Payment and financial issues - 5 min response"
+      rules:
+        - escalationDelayMinutes: 5
+          targets:
+            - type: on-call-schedule
+              id: finance-primary
+        - escalationDelayMinutes: 15
+          targets:
+            - type: on-call-schedule
+              id: platform-primary
+
+    - name: platform-standard
+      description: "Standard platform issues - 30 min response"
+      rules:
+        - escalationDelayMinutes: 30
+          targets:
+            - type: on-call-schedule
+              id: platform-primary
+
+    - name: operations-standard
+      description: "Standard operations issues - 30 min response"
+      rules:
+        - escalationDelayMinutes: 30
+          targets:
+            - type: on-call-schedule
+              id: ops-primary
+
+    - name: ai-team
+      description: "AI/ML team escalation"
+      rules:
+        - escalationDelayMinutes: 30
+          targets:
+            - type: on-call-schedule
+              id: ai-primary
+
+  # On-call schedules
+  schedules:
+    - name: platform-primary
+      timezone: Africa/Johannesburg
+      layers:
+        - rotationType: weekly
+          startDay: monday
+          startTime: "08:00"
+
+    - name: platform-secondary
+      timezone: Africa/Johannesburg
+      layers:
+        - rotationType: weekly
+          startDay: monday
+          startTime: "08:00"
+
+    - name: ops-primary
+      timezone: Africa/Johannesburg
+      layers:
+        - rotationType: daily
+          startTime: "06:00"
+
+    - name: ops-secondary
+      timezone: Africa/Johannesburg
+      layers:
+        - rotationType: daily
+          startTime: "06:00"
+
+    - name: finance-primary
+      timezone: Africa/Johannesburg
+      layers:
+        - rotationType: weekly
+          startDay: monday
+          startTime: "08:00"
+
+    - name: ai-primary
+      timezone: Africa/Johannesburg
+      layers:
+        - rotationType: weekly
+          startDay: monday
+          startTime: "08:00"
+
+  # Alert severity mapping
+  severityMapping:
+    P1:
+      grafanaSeverity: critical
+      prometheusSeverity: critical
+      pagerdutyUrgency: high
+      responseTimeSLA: 5m
+      escalationPolicy: platform-critical
+    P2:
+      grafanaSeverity: warning
+      prometheusSeverity: warning
+      pagerdutyUrgency: high
+      responseTimeSLA: 15m
+      escalationPolicy: operations-standard
+    P3:
+      grafanaSeverity: info
+      prometheusSeverity: info
+      pagerdutyUrgency: low
+      responseTimeSLA: 1h
+      escalationPolicy: platform-standard
+    P4:
+      grafanaSeverity: none
+      prometheusSeverity: info
+      pagerdutyUrgency: low
+      responseTimeSLA: 24h
+      escalationPolicy: platform-standard

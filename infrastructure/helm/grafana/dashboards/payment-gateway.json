@@ -1,0 +1,85 @@
+{
+  "description": "Lastmile Gig - Payment Gateway Dashboard: Transaction volume, failure rate per gateway",
+  "editable": true,
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Transactions Today",
+      "type": "stat",
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [{ "expr": "sum(increase(lmg_payment_attempts_total[24h]))", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "title": "Success Rate",
+      "type": "gauge",
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 95 }, { "color": "green", "value": 99 }] } } },
+      "targets": [{ "expr": "100 * sum(rate(lmg_payment_success_total[1h])) / sum(rate(lmg_payment_attempts_total[1h]))", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "title": "Revenue Today (ZAR)",
+      "type": "stat",
+      "fieldConfig": { "defaults": { "unit": "currencyZAR" } },
+      "targets": [{ "expr": "sum(increase(lmg_payments_revenue_zar_total[24h]))", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "title": "Avg Transaction (ZAR)",
+      "type": "stat",
+      "fieldConfig": { "defaults": { "unit": "currencyZAR" } },
+      "targets": [{ "expr": "sum(increase(lmg_payments_revenue_zar_total[24h])) / sum(increase(lmg_payment_success_total[24h]))", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "id": 5,
+      "title": "Transaction Volume by Gateway",
+      "type": "timeseries",
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 20 }, "unit": "short" } },
+      "targets": [{ "expr": "sum(rate(lmg_payment_attempts_total[5m])) by (gateway)", "legendFormat": "{{gateway}}", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "id": 6,
+      "title": "Failure Rate by Gateway",
+      "type": "timeseries",
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 }, "unit": "percent", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 5 }] } } },
+      "targets": [{ "expr": "100 * sum(rate(lmg_payment_failures_total[5m])) by (gateway) / sum(rate(lmg_payment_attempts_total[5m])) by (gateway)", "legendFormat": "{{gateway}}", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 7,
+      "title": "Payout Volume (Drivers)",
+      "type": "timeseries",
+      "fieldConfig": { "defaults": { "unit": "currencyZAR", "custom": { "drawStyle": "bars", "fillOpacity": 80 } } },
+      "targets": [{ "expr": "sum(increase(lmg_driver_payout_zar_total[1h])) by (gateway)", "legendFormat": "{{gateway}}", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "id": 8,
+      "title": "P99 Payment Latency by Gateway",
+      "type": "timeseries",
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "targets": [{ "expr": "histogram_quantile(0.99, sum(rate(lmg_payment_duration_seconds_bucket[5m])) by (le, gateway)) * 1000", "legendFormat": "{{gateway}} p99", "refId": "A" }]
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "tags": ["lastmile-gig", "payments"],
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "Lastmile Gig - Payment Gateway",
+  "uid": "lmg-payment-gateway",
+  "version": 1
+}

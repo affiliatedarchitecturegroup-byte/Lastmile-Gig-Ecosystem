@@ -1,0 +1,12 @@
+apiVersion: v2
+name: lmg-otel-collector
+description: OpenTelemetry Collector DaemonSet for Lastmile Gig Ecosystem
+type: application
+version: 1.0.0
+appVersion: "0.96.0"
+
+dependencies:
+  - name: opentelemetry-collector
+    version: "0.82.0"
+    repository: "https://open-telemetry.github.io/opentelemetry-helm-charts"
+    condition: opentelemetry-collector.enabled

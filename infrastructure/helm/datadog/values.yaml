@@ -1,0 +1,124 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Datadog Agent Configuration
+# Phase: P041 | Datadog agent deployed, infrastructure metrics flowing
+# -------------------------------------------------------------------
+
+datadog:
+  enabled: true
+
+  datadog:
+    # API key via Vault secret
+    apiKeyExistingSecret: datadog-api-key
+    appKeyExistingSecret: datadog-app-key
+
+    # Site configuration for EU (closest to ZA)
+    site: datadoghq.eu
+
+    # Cluster name for identification
+    clusterName: lmg-production
+
+    # Tags applied to all metrics
+    tags:
+      - "platform:lastmile-gig"
+      - "region:af-south-1"
+      - "env:${LMG_ENVIRONMENT}"
+
+    # Log collection
+    logs:
+      enabled: true
+      containerCollectAll: true
+      containerCollectUsingFiles: true
+
+    # APM configuration
+    apm:
+      portEnabled: true
+      socketEnabled: true
+
+    # Process agent
+    processAgent:
+      enabled: true
+      processCollection: true
+
+    # Network performance monitoring
+    networkMonitoring:
+      enabled: true
+
+    # Universal service monitoring
+    serviceMonitoring:
+      enabled: true
+
+    # Security agent
+    securityAgent:
+      compliance:
+        enabled: true
+      runtime:
+        enabled: true
+
+    # Orchestrator Explorer
+    orchestratorExplorer:
+      enabled: true
+
+    # Cluster checks
+    clusterChecks:
+      enabled: true
+
+    # Kubernetes integration
+    kubeStateMetricsEnabled: true
+    kubeStateMetricsCore:
+      enabled: true
+
+    # Prometheus scraping
+    prometheusScrape:
+      enabled: true
+      serviceEndpoints: true
+
+    # Container exclude/include
+    containerExclude: "kube_namespace:kube-system"
+
+  # Agent resources
+  agents:
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+
+    tolerations:
+      - effect: NoSchedule
+        operator: Exists
+
+  # Cluster agent
+  clusterAgent:
+    enabled: true
+    replicas: 2
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+
+    # Admission controller for auto-instrumentation
+    admissionController:
+      enabled: true
+      mutateUnlabelled: false
+
+    # External metrics provider
+    metricsProvider:
+      enabled: true
+      useDatadogMetrics: true
+
+  # Cluster checks runner
+  clusterChecksRunner:
+    enabled: true
+    replicas: 2
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"

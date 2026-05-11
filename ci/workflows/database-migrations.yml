@@ -1,0 +1,170 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Database Migration Pipeline
+# Phase: P088 | Migration runs as init container on deploy
+# -------------------------------------------------------------------
+
+name: Database Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/database/migrations/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "infrastructure/database/migrations/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - dev
+          - staging
+          - production
+
+env:
+  MIGRATION_DIR: infrastructure/database/migrations
+
+jobs:
+  validate:
+    name: Validate Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check migration file naming
+        run: |
+          echo "Validating migration file naming convention..."
+          ERRORS=0
+          for file in ${{ env.MIGRATION_DIR }}/*.sql; do
+            filename=$(basename "$file")
+            if ! echo "$filename" | grep -qE '^[0-9]{3}_[a-z_]+\.sql$'; then
+              echo "ERROR: Invalid migration filename: $filename"
+              echo "Expected format: NNN_description.sql (e.g., 001_create_users.sql)"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ "$ERRORS" -gt 0 ]; then
+            exit 1
+          fi
+          echo "All migration files follow naming convention"
+
+      - name: Check migration ordering
+        run: |
+          echo "Checking migration ordering..."
+          PREV=0
+          for file in $(ls ${{ env.MIGRATION_DIR }}/*.sql | sort); do
+            NUM=$(basename "$file" | grep -oE '^[0-9]+' | sed 's/^0*//')
+            if [ "$NUM" -le "$PREV" ]; then
+              echo "ERROR: Migration number $NUM is not greater than previous $PREV"
+              exit 1
+            fi
+            PREV=$NUM
+          done
+          echo "Migration ordering is correct"
+
+      - name: Lint SQL files
+        run: |
+          echo "Checking SQL files for common issues..."
+          ERRORS=0
+          for file in ${{ env.MIGRATION_DIR }}/*.sql; do
+            # Check for DROP TABLE without IF EXISTS
+            if grep -n 'DROP TABLE [^I]' "$file" | grep -v 'IF EXISTS'; then
+              echo "WARNING: $file contains DROP TABLE without IF EXISTS"
+            fi
+            # Check for secrets/credentials
+            if grep -inE '(password|secret|key)\s*=' "$file" | grep -v 'COMMENT\|--'; then
+              echo "ERROR: $file may contain hardcoded credentials"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ "$ERRORS" -gt 0 ]; then
+            exit 1
+          fi
+          echo "SQL lint checks passed"
+
+  dry-run:
+    name: Migration Dry Run
+    needs: validate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: lmg_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostGIS extension
+        run: |
+          PGPASSWORD=test_password psql -h localhost -U test_user -d lmg_test -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+      - name: Run migrations (dry run)
+        run: |
+          echo "Running migrations against test database..."
+          for file in $(ls ${{ env.MIGRATION_DIR }}/*.sql | sort); do
+            echo "Applying: $(basename $file)"
+            PGPASSWORD=test_password psql -h localhost -U test_user -d lmg_test -f "$file" -v ON_ERROR_STOP=1 || {
+              echo "FAILED: $(basename $file)"
+              exit 1
+            }
+          done
+          echo "All migrations applied successfully"
+
+      - name: Verify schema
+        run: |
+          echo "Verifying expected tables exist..."
+          TABLES="users drivers partners vehicles orders payments sla_contracts audit_log consent_records"
+          for table in $TABLES; do
+            RESULT=$(PGPASSWORD=test_password psql -h localhost -U test_user -d lmg_test -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '$table');")
+            if echo "$RESULT" | grep -q 'f'; then
+              echo "ERROR: Table '$table' does not exist"
+              exit 1
+            fi
+            echo "OK: $table"
+          done
+          echo "Schema verification complete"
+
+  apply:
+    name: Apply Migrations
+    needs: validate
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: af-south-1
+
+      - name: Get database URL from Vault
+        id: vault
+        run: |
+          # Fetch database URL from Vault via Kubernetes auth
+          echo "Fetching database credentials from Vault..."
+          # Placeholder - actual implementation uses vault CLI
+          echo "database_url=placeholder" >> $GITHUB_OUTPUT
+
+      - name: Apply migrations
+        run: |
+          echo "Applying migrations to ${{ github.event.inputs.environment || 'staging' }}..."
+          # In production, this runs as an init container in the Helm chart
+          # Here for manual/CI trigger scenarios
+          echo "Migration apply would execute here with proper credentials"

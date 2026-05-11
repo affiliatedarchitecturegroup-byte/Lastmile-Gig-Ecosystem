@@ -1,0 +1,189 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Platform Alerting Rules
+# Phase: P031 | Core alerting rules for all LMG services
+# -------------------------------------------------------------------
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: lmg-platform-alerts
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  groups:
+    # -- Service Health Alerts
+    - name: lmg.service.health
+      rules:
+        - alert: LMGServiceDown
+          expr: up{job=~"lmg-.*"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            team: platform
+          annotations:
+            summary: "LMG service {{ $labels.job }} is down"
+            description: "Service {{ $labels.job }} in namespace {{ $labels.namespace }} has been down for more than 2 minutes."
+            runbook_url: "https://docs.lastmilegig.aagais.co.za/runbooks/service-down"
+
+        - alert: LMGHighErrorRate
+          expr: |
+            100 * sum(rate(lmg_http_requests_total{status=~"5.."}[5m])) by (service)
+            / sum(rate(lmg_http_requests_total[5m])) by (service) > 5
+          for: 5m
+          labels:
+            severity: critical
+            team: platform
+          annotations:
+            summary: "High error rate on {{ $labels.service }}"
+            description: "Service {{ $labels.service }} has a 5xx error rate of {{ $value }}% over the last 5 minutes."
+
+        - alert: LMGHighLatency
+          expr: |
+            histogram_quantile(0.99, sum(rate(lmg_http_request_duration_seconds_bucket[5m])) by (le, service)) > 2
+          for: 5m
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "High p99 latency on {{ $labels.service }}"
+            description: "Service {{ $labels.service }} p99 latency is {{ $value }}s (threshold: 2s)."
+
+        - alert: LMGPodRestartLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace=~"lmg-.*"}[1h]) > 5
+          for: 10m
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "Pod {{ $labels.pod }} is restart-looping"
+            description: "Pod {{ $labels.pod }} in {{ $labels.namespace }} has restarted {{ $value }} times in the last hour."
+
+    # -- Order & Dispatch Alerts
+    - name: lmg.orders
+      rules:
+        - alert: LMGOrderBacklogHigh
+          expr: sum(lmg_orders_active_total{status="pending"}) > 100
+          for: 10m
+          labels:
+            severity: warning
+            team: operations
+          annotations:
+            summary: "Order backlog exceeds 100 pending orders"
+            description: "There are {{ $value }} pending orders. Dispatch may be stuck or drivers unavailable."
+
+        - alert: LMGDispatchFailureRateHigh
+          expr: |
+            100 * sum(rate(lmg_dispatch_failures_total[5m]))
+            / sum(rate(lmg_dispatch_attempts_total[5m])) > 20
+          for: 5m
+          labels:
+            severity: critical
+            team: operations
+          annotations:
+            summary: "Dispatch failure rate above 20%"
+            description: "Dispatch engine failure rate is {{ $value }}%. Immediate investigation required."
+
+        - alert: LMGNoActiveDrivers
+          expr: sum(lmg_drivers_active_total) == 0
+          for: 5m
+          labels:
+            severity: critical
+            team: operations
+          annotations:
+            summary: "No active drivers on platform"
+            description: "Zero drivers are currently active. All incoming orders will fail to dispatch."
+
+    # -- Payment Alerts
+    - name: lmg.payments
+      rules:
+        - alert: LMGPaymentFailureRateHigh
+          expr: |
+            100 * sum(rate(lmg_payment_failures_total[10m]))
+            / sum(rate(lmg_payment_attempts_total[10m])) > 10
+          for: 5m
+          labels:
+            severity: critical
+            team: finance
+          annotations:
+            summary: "Payment failure rate above 10%"
+            description: "Payment gateway failure rate is {{ $value }}% over last 10 minutes."
+
+        - alert: LMGPaystackWebhookDelay
+          expr: |
+            time() - max(lmg_webhook_last_received_timestamp{gateway="paystack"}) > 600
+          for: 5m
+          labels:
+            severity: warning
+            team: finance
+          annotations:
+            summary: "No Paystack webhooks received in 10 minutes"
+            description: "Last Paystack webhook was received {{ $value }}s ago. Payment confirmations may be delayed."
+
+    # -- Infrastructure Alerts
+    - name: lmg.infrastructure
+      rules:
+        - alert: LMGKafkaConsumerLagHigh
+          expr: sum(kafka_consumergroup_lag) by (consumergroup, topic) > 10000
+          for: 10m
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "Kafka consumer lag high for {{ $labels.consumergroup }}"
+            description: "Consumer group {{ $labels.consumergroup }} on topic {{ $labels.topic }} has a lag of {{ $value }} messages."
+
+        - alert: LMGKafkaConsumerLagCritical
+          expr: sum(kafka_consumergroup_lag) by (consumergroup, topic) > 50000
+          for: 5m
+          labels:
+            severity: critical
+            team: platform
+          annotations:
+            summary: "Kafka consumer lag critical for {{ $labels.consumergroup }}"
+            description: "Consumer group {{ $labels.consumergroup }} on topic {{ $labels.topic }} has a lag of {{ $value }} messages. Data loss risk."
+
+        - alert: LMGDiskUsageHigh
+          expr: |
+            100 * (1 - node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) > 85
+          for: 10m
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "Disk usage above 85% on {{ $labels.instance }}"
+            description: "Node {{ $labels.instance }} disk usage is {{ $value }}%."
+
+        - alert: LMGMemoryPressure
+          expr: |
+            100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 90
+          for: 10m
+          labels:
+            severity: critical
+            team: platform
+          annotations:
+            summary: "Memory pressure on {{ $labels.instance }}"
+            description: "Node {{ $labels.instance }} memory usage is {{ $value }}%. OOM kills may occur."
+
+    # -- Database Alerts
+    - name: lmg.database
+      rules:
+        - alert: LMGDatabaseConnectionPoolExhausted
+          expr: lmg_db_pool_available_connections < 5
+          for: 2m
+          labels:
+            severity: critical
+            team: platform
+          annotations:
+            summary: "Database connection pool nearly exhausted"
+            description: "Only {{ $value }} connections remaining in the pool for {{ $labels.service }}."
+
+        - alert: LMGSlowQueries
+          expr: rate(lmg_db_query_duration_seconds_sum[5m]) / rate(lmg_db_query_duration_seconds_count[5m]) > 1
+          for: 5m
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "Slow database queries on {{ $labels.service }}"
+            description: "Average query duration is {{ $value }}s for {{ $labels.service }}."
