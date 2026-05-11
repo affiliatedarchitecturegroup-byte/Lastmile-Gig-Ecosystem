@@ -1,0 +1,108 @@
+# Auth Service Helm Values
+# @see docs/specs/08_INFRASTRUCTURE_IaC.md
+
+replicaCount: 2
+
+image:
+  repository: lastmilegig/svc-auth
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+nameOverride: ""
+fullnameOverride: "svc-auth"
+
+serviceAccount:
+  create: true
+  name: "svc-auth"
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "svc-auth"
+
+service:
+  type: ClusterIP
+  port: 3001
+  targetPort: 3001
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+env:
+  - name: LMG_ENVIRONMENT
+    value: "production"
+  - name: LMG_PORT_AUTH_SERVICE
+    value: "3001"
+  - name: LMG_LOG_LEVEL
+    value: "info"
+
+envFrom:
+  - secretRef:
+      name: svc-auth-secrets
+
+livenessProbe:
+  httpGet:
+    path: /v1/health
+    port: 3001
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /v1/ready
+    port: 3001
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+nodeSelector:
+  kubernetes.io/arch: amd64
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - svc-auth
+          topologyKey: kubernetes.io/hostname
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3001"
+  prometheus.io/path: "/v1/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
