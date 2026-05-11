@@ -21,7 +21,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **Total Phases Defined** | 360+ | 360+ |
 | **Phases Completed** | 20 (P091-P110) | 360+ |
 | **Current Phase Group** | E - Auth & API Gateway | Q - Post-Launch |
-| **Cumulative LoC** | ~30,603 | ~810,000+ |
+| **Cumulative LoC** | ~32,082 | ~810,000+ |
 | **Source Files Created** | ~72+ | ~2,500+ |
 | **Backend Languages Active** | 1 of 6 | 6 (TS, Python, Go, Rust, Java, Elixir) |
 | **Frontend Frameworks Active** | 0 of 3 | 3 (Next.js, Angular, React Native) |
@@ -80,6 +80,18 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 
 **Session 5 Total:** ~3,460 LoC | 25 files created/modified | Driver Ecosystem Part 1 complete
 
+#### Session 6 (2026-05-11) - Phase Group F Part 2: Wallet, Performance, Fleet (P128-P145)
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Driver Wallet Angular Dashboard - Earnings charts, payout history, instant Ozow payout (1 file) | 228 | 30,831 |
+| Wave 2 | Complete | Driver Performance Scoring - SageMaker XGBoost model, rule-based fallback, tier system (1 file) | 277 | 31,108 |
+| Wave 3 | Complete | Mobile Enhancements - Push notifications (Firebase), offline queue with sync (2 files) | 330 | 31,438 |
+| Wave 4 | Complete | Fleet Management - Vehicle CRUD, rental booking, IoT registration, maintenance scheduling (3 files) | 558 | 31,996 |
+| Wave 5 | Complete | Fleet Infrastructure - Dockerfile, package.json, module (2 files) | 86 | 32,082 |
+
+**Session 6 Total:** ~1,479 LoC | 9 files created | Phase Group F complete
+
 ---
 
 ## Phase Group Progress
@@ -91,7 +103,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **C** | P051-P070 | Security & Compliance | Not Started | 0/20 |
 | **D** | P071-P090 | Core Database Schemas | Not Started | 0/20 |
 | **E** | P091-P110 | Auth & API Gateway | **Complete** | **20/20** |
-| **F** | P111-P145 | Driver Ecosystem | **In Progress** | **15/35** |
+| **F** | P111-P145 | Driver Ecosystem | **Complete** | **35/35** |
 | **G** | P146-P175 | Order & Dispatch | Not Started | 0/30 |
 | **H** | P176-P205 | Restaurant Storefronts | Not Started | 0/30 |
 | **I** | P206-P225 | Payments | Not Started | 0/20 |
@@ -153,7 +165,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | YAML (K8s/Helm/CI) | ~870 | ~19,500 | 4.5% |
 | SQL (Migrations) | ~680 | ~5,000 | 13.6% |
 | Other (Bash, Config, Proto) | ~486 | ~8,000 | 6.1% |
-| **TOTAL** | **~30,603** | **~810,000** | **3.8%** |
+| **TOTAL** | **~32,082** | **~810,000** | **4.0%** |
 
 ---
 
