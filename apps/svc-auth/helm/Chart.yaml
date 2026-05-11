@@ -1,0 +1,15 @@
+apiVersion: v2
+name: svc-auth
+description: Lastmile Gig Auth Service - OAuth2/SSO, JWT, RBAC, API Key Management
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - authentication
+  - authorization
+  - auth0
+  - jwt
+  - rbac
+maintainers:
+  - name: AAG DevOps
+    email: devops@aagais.co.za

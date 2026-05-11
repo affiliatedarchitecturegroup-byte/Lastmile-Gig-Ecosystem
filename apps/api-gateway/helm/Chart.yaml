@@ -1,0 +1,14 @@
+apiVersion: v2
+name: api-gateway
+description: Lastmile Gig API Gateway - Traffic routing, auth, rate limiting, OpenAPI
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - api-gateway
+  - routing
+  - rate-limiting
+  - openapi
+maintainers:
+  - name: AAG DevOps
+    email: devops@aagais.co.za
