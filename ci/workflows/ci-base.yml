@@ -1,0 +1,232 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Base CI Pipeline
+# Phase: P051 | Build + test + lint pipeline for TypeScript services
+# -------------------------------------------------------------------
+
+name: CI - Base Pipeline
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
+jobs:
+  # Determine affected projects
+  affected:
+    runs-on: ubuntu-latest
+    outputs:
+      affected_projects: ${{ steps.affected.outputs.projects }}
+      has_ts_changes: ${{ steps.affected.outputs.has_ts }}
+      has_py_changes: ${{ steps.affected.outputs.has_py }}
+      has_go_changes: ${{ steps.affected.outputs.has_go }}
+      has_rust_changes: ${{ steps.affected.outputs.has_rust }}
+      has_java_changes: ${{ steps.affected.outputs.has_java }}
+      has_tf_changes: ${{ steps.affected.outputs.has_tf }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - run: npm ci --prefer-offline
+
+      - name: Determine affected projects
+        id: affected
+        run: |
+          AFFECTED=$(npx nx show projects --affected --base=origin/main 2>/dev/null || echo "")
+          echo "projects=$AFFECTED" >> $GITHUB_OUTPUT
+
+          # Check for language-specific changes
+          git diff --name-only origin/main...HEAD > changed_files.txt
+          echo "has_ts=$(grep -c '\.ts$\|\.tsx$' changed_files.txt || echo 0)" >> $GITHUB_OUTPUT
+          echo "has_py=$(grep -c '\.py$' changed_files.txt || echo 0)" >> $GITHUB_OUTPUT
+          echo "has_go=$(grep -c '\.go$' changed_files.txt || echo 0)" >> $GITHUB_OUTPUT
+          echo "has_rust=$(grep -c '\.rs$' changed_files.txt || echo 0)" >> $GITHUB_OUTPUT
+          echo "has_java=$(grep -c '\.java$' changed_files.txt || echo 0)" >> $GITHUB_OUTPUT
+          echo "has_tf=$(grep -c '\.tf$\|\.hcl$' changed_files.txt || echo 0)" >> $GITHUB_OUTPUT
+
+  # TypeScript lint, build, test
+  typescript:
+    needs: affected
+    if: needs.affected.outputs.has_ts_changes > 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - run: npm ci --prefer-offline
+
+      - name: Lint affected
+        run: npx nx affected --target=lint --base=origin/main --parallel=3
+
+      - name: Type check
+        run: npx nx affected --target=build --base=origin/main --parallel=3
+
+      - name: Test affected
+        run: npx nx affected --target=test --base=origin/main --parallel=3 --coverage
+        env:
+          CI: true
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-ts
+          path: coverage/
+          retention-days: 7
+
+  # Python lint and test
+  python:
+    needs: affected
+    if: needs.affected.outputs.has_py_changes > 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install ruff mypy pytest pytest-asyncio pytest-cov
+
+      - name: Lint with ruff
+        run: ruff check apps/svc-ai apps/svc-agents apps/svc-analytics
+
+      - name: Type check with mypy
+        run: mypy apps/svc-ai apps/svc-agents apps/svc-analytics --ignore-missing-imports
+
+      - name: Run tests
+        run: |
+          pytest apps/svc-ai apps/svc-agents apps/svc-analytics \
+            --cov --cov-report=xml --cov-report=term-missing \
+            -v --tb=short
+
+  # Go lint and test
+  golang:
+    needs: affected
+    if: needs.affected.outputs.has_go_changes > 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Lint with golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+          working-directory: apps/svc-dispatch
+
+      - name: Test
+        run: |
+          cd apps/svc-dispatch && go test ./... -v -race -coverprofile=coverage.out
+
+  # Rust lint and test
+  rust:
+    needs: affected
+    if: needs.affected.outputs.has_rust_changes > 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Format check
+        run: cargo fmt --all --check
+        working-directory: apps/svc-blockchain
+
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+        working-directory: apps/svc-blockchain
+
+      - name: Test
+        run: cargo test --all-features -- --test-threads=1
+        working-directory: apps/svc-blockchain
+
+  # Java lint and test
+  java:
+    needs: affected
+    if: needs.affected.outputs.has_java_changes > 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+          cache: "maven"
+
+      - name: Build and test
+        run: mvn verify -B -q
+        working-directory: apps/svc-payments
+
+  # File size check (1,800 LoC hard cap)
+  file-size-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check file sizes
+        run: |
+          echo "Checking for files exceeding 1,800 LoC hard cap..."
+          VIOLATIONS=0
+          while IFS= read -r file; do
+            LOC=$(wc -l < "$file")
+            if [ "$LOC" -gt 1800 ]; then
+              echo "VIOLATION: $file has $LOC lines (max: 1800)"
+              VIOLATIONS=$((VIOLATIONS + 1))
+            fi
+          done < <(find apps/ libs/ -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.go" -o -name "*.rs" -o -name "*.java" -o -name "*.ex" -o -name "*.exs" \) -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/build/*")
+
+          if [ "$VIOLATIONS" -gt 0 ]; then
+            echo "Found $VIOLATIONS file(s) exceeding the 1,800 LoC hard cap"
+            exit 1
+          fi
+          echo "All files within LoC limits"
+
+  # Commit message validation
+  commitlint:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - run: npm ci --prefer-offline
+
+      - name: Validate commit messages
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose

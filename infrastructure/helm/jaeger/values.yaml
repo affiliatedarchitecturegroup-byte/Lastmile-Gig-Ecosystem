@@ -1,0 +1,61 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Jaeger Tracing UI Configuration
+# Phase: P037 | Jaeger deployed, query UI accessible
+# -------------------------------------------------------------------
+
+jaeger:
+  enabled: true
+
+  # Use Tempo as backend storage (Jaeger UI reads from Tempo)
+  provisionDataStore:
+    cassandra: false
+    elasticsearch: false
+    kafka: false
+
+  storage:
+    type: grpc
+
+  # Query component - UI for trace exploration
+  query:
+    enabled: true
+    replicas: 2
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+
+    # Configure Jaeger Query to read from Tempo
+    cmdlineParams:
+      grpc-storage.server: lmg-tempo-query-frontend.lmg-monitoring:9095
+
+    ingress:
+      enabled: true
+      ingressClassName: istio
+      annotations:
+        kubernetes.io/tls-acme: "true"
+      hosts:
+        - jaeger.internal.lastmilegig.aagais.co.za
+      tls:
+        - secretName: jaeger-tls
+          hosts:
+            - jaeger.internal.lastmilegig.aagais.co.za
+
+    # Service configuration
+    service:
+      type: ClusterIP
+      port: 16686
+
+  # Collector disabled - OTel Collector handles ingestion
+  collector:
+    enabled: false
+
+  # Agent disabled - OTel Collector replaces it
+  agent:
+    enabled: false
+
+  # Spark dependencies disabled
+  spark:
+    enabled: false

@@ -1,0 +1,12 @@
+apiVersion: v2
+name: lmg-prometheus
+description: Prometheus monitoring stack for Lastmile Gig Ecosystem
+type: application
+version: 1.0.0
+appVersion: "2.51.0"
+
+dependencies:
+  - name: kube-prometheus-stack
+    version: "58.2.1"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: kube-prometheus-stack.enabled

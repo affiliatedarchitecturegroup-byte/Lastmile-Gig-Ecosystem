@@ -1,0 +1,60 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - SonarQube Static Analysis
+# Phase: P053-P054 | SonarQube scan, quality gate check
+# -------------------------------------------------------------------
+
+name: Security - SonarQube Analysis
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+env:
+  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+jobs:
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci --prefer-offline
+
+      # Run tests with coverage first
+      - name: Run tests with coverage
+        run: npx nx run-many --target=test --all --coverage --coverageReporters=lcov
+        continue-on-error: true
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=lastmile-gig-ecosystem
+            -Dsonar.organization=aag
+            -Dsonar.sources=apps/,libs/
+            -Dsonar.tests=apps/,libs/
+            -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts,**/*_test.go,**/*_test.rs,**/test_*.py
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/coverage/**,**/*.json
+            -Dsonar.typescript.lcov.reportPaths=coverage/**/lcov.info
+            -Dsonar.qualitygate.wait=true
+
+      - name: SonarQube Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

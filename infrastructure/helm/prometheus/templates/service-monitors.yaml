@@ -1,0 +1,338 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - ServiceMonitor CRDs
+# Phase: P032 | ServiceMonitor configs for all LMG namespaces
+# -------------------------------------------------------------------
+
+# API Gateway ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-api-gateway
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+  namespaceSelector:
+    matchNames:
+      - lmg-core
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      scrapeTimeout: 10s
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: "lmg_.*"
+          action: keep
+---
+# Auth Service ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-auth-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-auth
+  namespaceSelector:
+    matchNames:
+      - lmg-core
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      scrapeTimeout: 10s
+---
+# Driver Service ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-driver-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-drivers
+  namespaceSelector:
+    matchNames:
+      - lmg-drivers
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      scrapeTimeout: 10s
+---
+# Order Service ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-order-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-orders
+  namespaceSelector:
+    matchNames:
+      - lmg-orders
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      scrapeTimeout: 10s
+---
+# Dispatch Engine ServiceMonitor (Go)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-dispatch-engine
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-dispatch
+  namespaceSelector:
+    matchNames:
+      - lmg-dispatch
+  endpoints:
+    - port: metrics
+      interval: 10s
+      path: /metrics
+      scrapeTimeout: 8s
+---
+# Payment Service ServiceMonitor (Java/Spring Boot)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-payment-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-payments
+  namespaceSelector:
+    matchNames:
+      - lmg-payments
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /actuator/prometheus
+      scrapeTimeout: 10s
+---
+# Fleet Service ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-fleet-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-fleet
+  namespaceSelector:
+    matchNames:
+      - lmg-fleet
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      scrapeTimeout: 10s
+---
+# Storefront Service ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-storefront-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-storefronts
+  namespaceSelector:
+    matchNames:
+      - lmg-storefronts
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      scrapeTimeout: 10s
+---
+# AI Service ServiceMonitor (Python/FastAPI)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-ai-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-ai
+  namespaceSelector:
+    matchNames:
+      - lmg-ai
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      scrapeTimeout: 10s
+---
+# Blockchain Service ServiceMonitor (Rust)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-blockchain-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-blockchain
+  namespaceSelector:
+    matchNames:
+      - lmg-blockchain
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      scrapeTimeout: 10s
+---
+# IoT Service ServiceMonitor (Rust)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-iot-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-iot
+  namespaceSelector:
+    matchNames:
+      - lmg-iot
+  endpoints:
+    - port: metrics
+      interval: 10s
+      path: /metrics
+      scrapeTimeout: 8s
+---
+# Real-Time Tracking ServiceMonitor (Elixir/Phoenix)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-tracking-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-tracking
+  namespaceSelector:
+    matchNames:
+      - lmg-tracking
+  endpoints:
+    - port: metrics
+      interval: 10s
+      path: /metrics
+      scrapeTimeout: 8s
+---
+# Communications Hub ServiceMonitor (Elixir/Phoenix)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-comms-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-comms
+  namespaceSelector:
+    matchNames:
+      - lmg-comms
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      scrapeTimeout: 10s
+---
+# Logistics Service ServiceMonitor (Java/Spring Boot)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-logistics-service
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: svc-logistics
+  namespaceSelector:
+    matchNames:
+      - lmg-logistics
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /actuator/prometheus
+      scrapeTimeout: 10s
+---
+# Kafka Exporter ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lmg-kafka-exporter
+  namespace: lmg-monitoring
+  labels:
+    monitoring: lmg-platform
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  selector:
+    matchLabels:
+      app: kafka-exporter
+  namespaceSelector:
+    matchNames:
+      - lmg-kafka
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+      scrapeTimeout: 15s

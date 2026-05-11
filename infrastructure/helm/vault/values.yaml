@@ -1,0 +1,260 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - HashiCorp Vault Configuration
+# Phase: P064-P065, P070 | Vault dynamic DB creds, KMS, biometric
+# -------------------------------------------------------------------
+
+vault:
+  global:
+    enabled: true
+
+  server:
+    ha:
+      enabled: true
+      replicas: 3
+      raft:
+        enabled: true
+        config: |
+          ui = true
+
+          listener "tcp" {
+            tls_disable     = 0
+            address         = "[::]:8200"
+            cluster_address = "[::]:8201"
+            tls_cert_file   = "/vault/tls/tls.crt"
+            tls_key_file    = "/vault/tls/tls.key"
+          }
+
+          storage "raft" {
+            path = "/vault/data"
+          }
+
+          seal "awskms" {
+            region     = "af-south-1"
+            kms_key_id = ""  # Set via Terraform output
+          }
+
+          telemetry {
+            prometheus_retention_time = "30s"
+            disable_hostname         = true
+          }
+
+          service_registration "kubernetes" {}
+
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
+
+    dataStorage:
+      enabled: true
+      size: 20Gi
+      storageClass: gp3
+
+    auditStorage:
+      enabled: true
+      size: 50Gi
+      storageClass: gp3
+
+    ingress:
+      enabled: true
+      ingressClassName: istio
+      hosts:
+        - host: vault.internal.lastmilegig.aagais.co.za
+      tls:
+        - secretName: vault-tls
+          hosts:
+            - vault.internal.lastmilegig.aagais.co.za
+
+    serviceAccount:
+      create: true
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::role/lmg-vault-role
+
+  # Injector for automatic secret injection into pods
+  injector:
+    enabled: true
+    replicas: 2
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+
+  # CSI provider for volume-mounted secrets
+  csi:
+    enabled: true
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "250m"
+
+# Secret engines configuration (applied via vault CLI post-install)
+# Documented here for reference; actual setup via Terraform Vault provider
+
+secretEngines:
+  # KV v2 for static secrets
+  - path: secret
+    type: kv-v2
+    description: "Static secrets for all LMG services"
+    config:
+      max_versions: 10
+      delete_version_after: "0s"
+
+  # Transit engine for encryption
+  - path: transit
+    type: transit
+    description: "Encryption-as-a-service for PII and sensitive data"
+    keys:
+      - name: pii-encryption
+        type: aes256-gcm96
+        description: "PII field-level encryption"
+      - name: biometric-encryption
+        type: aes256-gcm96
+        description: "Biometric data encryption (Phase P070)"
+      - name: payment-encryption
+        type: aes256-gcm96
+        description: "Payment card/account encryption"
+
+  # PKI engine for internal TLS
+  - path: pki
+    type: pki
+    description: "Internal PKI for mTLS certificates"
+    config:
+      max_lease_ttl: "87600h"  # 10 years
+
+  # Database engine for dynamic credentials
+  - path: database
+    type: database
+    description: "Dynamic database credentials"
+    connections:
+      - name: supabase-readonly
+        plugin: postgresql-database-plugin
+        connection_url: "postgresql://{{username}}:{{password}}@${LMG_SUPABASE_HOST}:5432/postgres"
+        allowed_roles: ["supabase-readonly"]
+        username: vault_admin
+        password_vault_path: secret/data/database/supabase-admin
+      - name: supabase-readwrite
+        plugin: postgresql-database-plugin
+        connection_url: "postgresql://{{username}}:{{password}}@${LMG_SUPABASE_HOST}:5432/postgres"
+        allowed_roles: ["supabase-readwrite"]
+        username: vault_admin
+        password_vault_path: secret/data/database/supabase-admin
+
+  # AWS engine for dynamic AWS credentials
+  - path: aws
+    type: aws
+    description: "Dynamic AWS credentials for services"
+
+# Auth methods
+authMethods:
+  - path: kubernetes
+    type: kubernetes
+    description: "Kubernetes service account auth for pods"
+    config:
+      kubernetes_host: "https://kubernetes.default.svc"
+
+# Policies
+policies:
+  - name: lmg-api-gateway
+    rules: |
+      path "secret/data/api-gateway/*" {
+        capabilities = ["read"]
+      }
+      path "transit/encrypt/pii-encryption" {
+        capabilities = ["update"]
+      }
+      path "transit/decrypt/pii-encryption" {
+        capabilities = ["update"]
+      }
+      path "database/creds/supabase-readonly" {
+        capabilities = ["read"]
+      }
+
+  - name: lmg-auth-service
+    rules: |
+      path "secret/data/auth/*" {
+        capabilities = ["read"]
+      }
+      path "database/creds/supabase-readwrite" {
+        capabilities = ["read"]
+      }
+
+  - name: lmg-payment-service
+    rules: |
+      path "secret/data/payments/*" {
+        capabilities = ["read"]
+      }
+      path "transit/encrypt/payment-encryption" {
+        capabilities = ["update"]
+      }
+      path "transit/decrypt/payment-encryption" {
+        capabilities = ["update"]
+      }
+      path "database/creds/supabase-readwrite" {
+        capabilities = ["read"]
+      }
+
+  - name: lmg-driver-service
+    rules: |
+      path "secret/data/drivers/*" {
+        capabilities = ["read"]
+      }
+      path "transit/encrypt/biometric-encryption" {
+        capabilities = ["update"]
+      }
+      path "transit/decrypt/biometric-encryption" {
+        capabilities = ["update"]
+      }
+      path "database/creds/supabase-readwrite" {
+        capabilities = ["read"]
+      }
+
+  - name: lmg-blockchain-service
+    rules: |
+      path "secret/data/blockchain/*" {
+        capabilities = ["read"]
+      }
+      # Blockchain wallet keys - read only, never rotate
+      path "transit/sign/blockchain-signing" {
+        capabilities = ["update"]
+      }
+
+# Kubernetes auth roles (bind service accounts to policies)
+kubernetesRoles:
+  - name: api-gateway
+    bound_service_account_names: ["api-gateway"]
+    bound_service_account_namespaces: ["lmg-core"]
+    policies: ["lmg-api-gateway"]
+    ttl: "1h"
+
+  - name: auth-service
+    bound_service_account_names: ["svc-auth"]
+    bound_service_account_namespaces: ["lmg-core"]
+    policies: ["lmg-auth-service"]
+    ttl: "1h"
+
+  - name: payment-service
+    bound_service_account_names: ["svc-payments"]
+    bound_service_account_namespaces: ["lmg-payments"]
+    policies: ["lmg-payment-service"]
+    ttl: "1h"
+
+  - name: driver-service
+    bound_service_account_names: ["svc-drivers"]
+    bound_service_account_namespaces: ["lmg-drivers"]
+    policies: ["lmg-driver-service"]
+    ttl: "1h"
+
+  - name: blockchain-service
+    bound_service_account_names: ["svc-blockchain"]
+    bound_service_account_namespaces: ["lmg-blockchain"]
+    policies: ["lmg-blockchain-service"]
+    ttl: "1h"

@@ -1,0 +1,91 @@
+{
+  "description": "Lastmile Gig - Driver Health Dashboard: Active drivers by zone, performance scores",
+  "editable": true,
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Total Active Drivers",
+      "type": "stat",
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 20 }, { "color": "green", "value": 50 }] } } },
+      "targets": [{ "expr": "sum(lmg_drivers_active_total)", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "title": "Online Drivers",
+      "type": "stat",
+      "targets": [{ "expr": "sum(lmg_drivers_active_total{status=\"online\"})", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "title": "On Delivery",
+      "type": "stat",
+      "targets": [{ "expr": "sum(lmg_drivers_active_total{status=\"on_delivery\"})", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "title": "Avg Performance Score",
+      "type": "gauge",
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 60 }, { "color": "green", "value": 80 }] } } },
+      "targets": [{ "expr": "avg(lmg_driver_performance_score)", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "id": 5,
+      "title": "Active Drivers by Zone",
+      "type": "bargauge",
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 5 }, { "color": "green", "value": 10 }] } } },
+      "targets": [{ "expr": "sum(lmg_drivers_active_total) by (zone)", "legendFormat": "{{zone}}", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "id": 6,
+      "title": "Driver Tier Distribution",
+      "type": "piechart",
+      "targets": [{ "expr": "sum(lmg_drivers_total) by (tier)", "legendFormat": "{{tier}}", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 7,
+      "title": "Delivery Acceptance Rate",
+      "type": "timeseries",
+      "fieldConfig": { "defaults": { "unit": "percent", "custom": { "drawStyle": "line", "fillOpacity": 15 } } },
+      "targets": [{ "expr": "100 * sum(rate(lmg_driver_delivery_accepted_total[1h])) by (zone) / sum(rate(lmg_driver_delivery_offered_total[1h])) by (zone)", "legendFormat": "{{zone}}", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "id": 8,
+      "title": "Avg Delivery Duration by Zone",
+      "type": "timeseries",
+      "fieldConfig": { "defaults": { "unit": "m", "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "targets": [{ "expr": "avg(lmg_delivery_duration_seconds) by (zone) / 60", "legendFormat": "{{zone}}", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+      "id": 9,
+      "title": "Driver Earnings Today (ZAR)",
+      "type": "timeseries",
+      "fieldConfig": { "defaults": { "unit": "currencyZAR", "custom": { "drawStyle": "bars", "fillOpacity": 80, "stacking": { "mode": "normal" } } } },
+      "targets": [{ "expr": "sum(increase(lmg_driver_earnings_zar_total[1h])) by (zone)", "legendFormat": "{{zone}}", "refId": "A" }]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["lastmile-gig", "drivers"],
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "Lastmile Gig - Driver Health",
+  "uid": "lmg-driver-health",
+  "version": 1
+}

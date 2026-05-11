@@ -1,0 +1,16 @@
+apiVersion: v2
+name: lmg-loki
+description: Loki log aggregation stack for Lastmile Gig Ecosystem
+type: application
+version: 1.0.0
+appVersion: "2.9.6"
+
+dependencies:
+  - name: loki
+    version: "5.47.2"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: loki.enabled
+  - name: promtail
+    version: "6.15.5"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: promtail.enabled

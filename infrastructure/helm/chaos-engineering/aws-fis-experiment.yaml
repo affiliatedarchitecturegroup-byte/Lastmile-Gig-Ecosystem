@@ -1,0 +1,123 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Chaos Engineering First Experiment
+# Phase: P050 | Kill 1 API Gateway pod, validate resilience
+# -------------------------------------------------------------------
+
+# AWS Fault Injection Simulator (FIS) Experiment Template
+# This experiment kills a single API Gateway pod to validate
+# that the platform remains resilient with zero downtime.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lmg-chaos-experiment-001
+  namespace: lmg-monitoring
+  labels:
+    app.kubernetes.io/part-of: lastmile-gig
+    chaos-experiment: "001"
+data:
+  experiment.yaml: |
+    # Experiment: API Gateway Pod Termination
+    # Expected Result: Zero downtime, auto-recovery within 60s
+    # Prerequisites:
+    #   - API Gateway deployed with replicas >= 2
+    #   - Health checks and readiness probes configured
+    #   - PodDisruptionBudget configured (minAvailable: 1)
+    #   - Monitoring dashboards active
+
+    name: lmg-chaos-001-api-gateway-pod-kill
+    description: >
+      Terminate a single API Gateway pod to validate Kubernetes
+      self-healing and zero-downtime operation. Verifies that
+      HPA and PDB configurations work correctly.
+
+    hypothesis:
+      title: "API Gateway survives single pod termination"
+      description: >
+        When one API Gateway pod is terminated, the remaining pod(s)
+        continue serving traffic with no 5xx errors. Kubernetes
+        restarts the terminated pod within 60 seconds.
+
+    steady_state:
+      - probe: api_gateway_health
+        type: http
+        url: https://api.lastmilegig.aagais.co.za/health
+        expected_status: 200
+        timeout: 5s
+      - probe: api_gateway_replicas
+        type: kubernetes
+        resource: deployment/api-gateway
+        namespace: lmg-core
+        condition: "spec.replicas >= 2"
+      - probe: error_rate_baseline
+        type: prometheus
+        query: >
+          100 * sum(rate(lmg_http_requests_total{service="api-gateway",status=~"5.."}[1m]))
+          / sum(rate(lmg_http_requests_total{service="api-gateway"}[1m]))
+        condition: "< 1"
+
+    actions:
+      - name: terminate_api_gateway_pod
+        type: kubernetes
+        action: terminate_pod
+        namespace: lmg-core
+        selector:
+          app: api-gateway
+        count: 1
+        grace_period_seconds: 0
+
+    rollback:
+      - action: scale_deployment
+        type: kubernetes
+        resource: deployment/api-gateway
+        namespace: lmg-core
+        replicas: 3
+
+    validation:
+      duration: 120s
+      interval: 5s
+      checks:
+        - name: no_5xx_during_experiment
+          type: prometheus
+          query: >
+            sum(increase(lmg_http_requests_total{service="api-gateway",status=~"5.."}[2m]))
+          condition: "< 5"
+        - name: pod_recovered
+          type: kubernetes
+          resource: deployment/api-gateway
+          namespace: lmg-core
+          condition: "status.readyReplicas >= 2"
+          timeout: 90s
+        - name: latency_acceptable
+          type: prometheus
+          query: >
+            histogram_quantile(0.99, sum(rate(lmg_http_request_duration_seconds_bucket{service="api-gateway"}[2m])) by (le))
+          condition: "< 2"
+
+    success_criteria:
+      - "Zero 5xx errors during pod termination"
+      - "Pod auto-recovered within 60 seconds"
+      - "P99 latency remained under 2 seconds"
+      - "No PagerDuty critical alerts triggered"
+
+    tags:
+      environment: staging
+      team: platform
+      severity: low
+      phase: P050
+
+---
+# PodDisruptionBudget for API Gateway (required for chaos testing)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api-gateway-pdb
+  namespace: lmg-core
+  labels:
+    app: api-gateway
+    app.kubernetes.io/part-of: lastmile-gig
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: api-gateway

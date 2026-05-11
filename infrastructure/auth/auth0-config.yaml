@@ -1,0 +1,319 @@
+# -------------------------------------------------------------------
+# Lastmile Gig Ecosystem - Auth0 Configuration
+# Phase: P057-P059 | Auth0 tenant setup, apps, RBAC
+# -------------------------------------------------------------------
+
+# Auth0 tenant configuration for Lastmile Gig platform
+# Applied via Auth0 Deploy CLI or Terraform Auth0 provider
+
+tenant:
+  friendly_name: "Lastmile Gig"
+  support_email: "support@aagais.co.za"
+  support_url: "https://lastmilegig.aagais.co.za/support"
+  default_directory: "Username-Password-Authentication"
+  flags:
+    enable_client_connections: true
+    enable_apis_section: true
+    enable_pipeline2: true
+    enable_dynamic_client_registration: false
+    universal_login: true
+
+# Applications (Auth0 Clients)
+clients:
+  # Customer-facing web (Next.js)
+  - name: lmg-web-customer
+    app_type: spa
+    callbacks:
+      - https://lastmilegig.aagais.co.za/callback
+      - https://staging.lastmilegig.aagais.co.za/callback
+      - http://localhost:3000/callback
+    allowed_logout_urls:
+      - https://lastmilegig.aagais.co.za
+      - https://staging.lastmilegig.aagais.co.za
+      - http://localhost:3000
+    web_origins:
+      - https://lastmilegig.aagais.co.za
+      - https://staging.lastmilegig.aagais.co.za
+      - http://localhost:3000
+    grant_types: [authorization_code, implicit, refresh_token]
+    token_endpoint_auth_method: none
+    jwt_configuration:
+      alg: RS256
+      lifetime_in_seconds: 3600
+
+  # Restaurant storefronts (Next.js)
+  - name: lmg-web-storefronts
+    app_type: spa
+    callbacks:
+      - https://store.lastmilegig.aagais.co.za/callback
+      - http://localhost:3001/callback
+    allowed_logout_urls:
+      - https://store.lastmilegig.aagais.co.za
+      - http://localhost:3001
+    web_origins:
+      - https://store.lastmilegig.aagais.co.za
+      - http://localhost:3001
+    grant_types: [authorization_code, implicit, refresh_token]
+    token_endpoint_auth_method: none
+
+  # Ops Dashboard (Angular)
+  - name: lmg-dashboard-ops
+    app_type: spa
+    callbacks:
+      - https://ops.lastmilegig.aagais.co.za/callback
+      - http://localhost:4200/callback
+    allowed_logout_urls:
+      - https://ops.lastmilegig.aagais.co.za
+      - http://localhost:4200
+    web_origins:
+      - https://ops.lastmilegig.aagais.co.za
+      - http://localhost:4200
+    grant_types: [authorization_code, implicit, refresh_token]
+    token_endpoint_auth_method: none
+
+  # Admin Console (Angular)
+  - name: lmg-dashboard-admin
+    app_type: spa
+    callbacks:
+      - https://admin.lastmilegig.aagais.co.za/callback
+      - http://localhost:4201/callback
+    allowed_logout_urls:
+      - https://admin.lastmilegig.aagais.co.za
+      - http://localhost:4201
+    web_origins:
+      - https://admin.lastmilegig.aagais.co.za
+      - http://localhost:4201
+    grant_types: [authorization_code, implicit, refresh_token]
+    token_endpoint_auth_method: none
+
+  # Command Centre (Angular)
+  - name: lmg-dashboard-command
+    app_type: spa
+    callbacks:
+      - https://command.lastmilegig.aagais.co.za/callback
+      - http://localhost:4202/callback
+    allowed_logout_urls:
+      - https://command.lastmilegig.aagais.co.za
+      - http://localhost:4202
+    web_origins:
+      - https://command.lastmilegig.aagais.co.za
+      - http://localhost:4202
+    grant_types: [authorization_code, implicit, refresh_token]
+    token_endpoint_auth_method: none
+
+  # Corporate site (Next.js)
+  - name: lmg-web-corporate
+    app_type: spa
+    callbacks:
+      - https://lastmilegig.aagais.co.za/callback
+      - http://localhost:3002/callback
+    web_origins:
+      - https://lastmilegig.aagais.co.za
+      - http://localhost:3002
+    grant_types: [authorization_code, implicit, refresh_token]
+    token_endpoint_auth_method: none
+
+  # Investor portal (Next.js - protected)
+  - name: lmg-investor-portal
+    app_type: spa
+    callbacks:
+      - https://lastmilegig.aagais.co.za/investors/callback
+    web_origins:
+      - https://lastmilegig.aagais.co.za
+    grant_types: [authorization_code, refresh_token]
+    token_endpoint_auth_method: none
+
+  # API Gateway (M2M)
+  - name: lmg-api-gateway-m2m
+    app_type: non_interactive
+    grant_types: [client_credentials]
+    token_endpoint_auth_method: client_secret_post
+
+  # Grafana (OAuth)
+  - name: lmg-grafana
+    app_type: regular_web
+    callbacks:
+      - https://grafana.internal.lastmilegig.aagais.co.za/login/generic_oauth
+    grant_types: [authorization_code, refresh_token]
+    token_endpoint_auth_method: client_secret_post
+
+# APIs (Resource Servers)
+resourceServers:
+  - name: Lastmile Gig API
+    identifier: https://api.lastmilegig.aagais.co.za
+    signing_alg: RS256
+    token_lifetime: 3600
+    allow_offline_access: true
+    scopes:
+      - value: "read:orders"
+        description: "Read order data"
+      - value: "write:orders"
+        description: "Create and update orders"
+      - value: "read:drivers"
+        description: "Read driver data"
+      - value: "write:drivers"
+        description: "Manage driver records"
+      - value: "read:fleet"
+        description: "Read fleet data"
+      - value: "write:fleet"
+        description: "Manage fleet vehicles"
+      - value: "read:payments"
+        description: "Read payment data"
+      - value: "write:payments"
+        description: "Process payments"
+      - value: "read:analytics"
+        description: "Read analytics data"
+      - value: "admin:platform"
+        description: "Full platform administration"
+      - value: "ops:dispatch"
+        description: "Dispatch operations"
+      - value: "ops:hitl"
+        description: "Human-in-the-loop approval"
+
+# Roles (RBAC)
+roles:
+  - name: SUPER_ADMIN
+    description: "Full platform + infrastructure access (MFA + IP allowlist)"
+    permissions:
+      - "admin:platform"
+      - "read:orders"
+      - "write:orders"
+      - "read:drivers"
+      - "write:drivers"
+      - "read:fleet"
+      - "write:fleet"
+      - "read:payments"
+      - "write:payments"
+      - "read:analytics"
+      - "ops:dispatch"
+      - "ops:hitl"
+
+  - name: ADMIN
+    description: "Full platform access (MFA required)"
+    permissions:
+      - "admin:platform"
+      - "read:orders"
+      - "write:orders"
+      - "read:drivers"
+      - "write:drivers"
+      - "read:fleet"
+      - "write:fleet"
+      - "read:payments"
+      - "read:analytics"
+      - "ops:dispatch"
+      - "ops:hitl"
+
+  - name: OPS_SENIOR
+    description: "All ops + HITL approval gates"
+    permissions:
+      - "read:orders"
+      - "write:orders"
+      - "read:drivers"
+      - "read:fleet"
+      - "read:analytics"
+      - "ops:dispatch"
+      - "ops:hitl"
+
+  - name: OPS_STAFF
+    description: "View all orders, manage dispatch"
+    permissions:
+      - "read:orders"
+      - "read:drivers"
+      - "read:fleet"
+      - "ops:dispatch"
+
+  - name: FLEET_MANAGER
+    description: "Fleet assignment, maintenance"
+    permissions:
+      - "read:fleet"
+      - "write:fleet"
+      - "read:drivers"
+
+  - name: FINANCE
+    description: "Payment records, invoices, reconciliation"
+    permissions:
+      - "read:payments"
+      - "write:payments"
+      - "read:orders"
+      - "read:analytics"
+
+  - name: ESG_OFFICER
+    description: "ESG dashboard, report generation"
+    permissions:
+      - "read:analytics"
+
+  - name: PARTNER_ADMIN
+    description: "Partner staff + analytics, settings"
+    permissions:
+      - "read:orders"
+      - "read:analytics"
+
+  - name: PARTNER_STAFF
+    description: "Manage menu, view orders"
+    permissions:
+      - "read:orders"
+
+  - name: INVESTOR
+    description: "Investor dashboard (read-only)"
+    permissions:
+      - "read:analytics"
+
+  - name: DEVELOPER
+    description: "Developer Portal API access"
+    permissions:
+      - "read:orders"
+      - "read:drivers"
+
+  - name: DRIVER
+    description: "Accept orders, view earnings, manage rental"
+    permissions:
+      - "read:orders"
+      - "write:orders"
+      - "read:drivers"
+
+  - name: CUSTOMER
+    description: "Place orders, view own history"
+    permissions:
+      - "read:orders"
+      - "write:orders"
+
+# Rules and Actions
+actions:
+  - name: add-roles-to-token
+    trigger: post-login
+    description: "Add user roles and permissions to JWT access token"
+    code: |
+      exports.onExecutePostLogin = async (event, api) => {
+        const namespace = 'https://lastmilegig.aagais.co.za';
+        if (event.authorization) {
+          api.accessToken.setCustomClaim(
+            namespace + '/roles',
+            event.authorization.roles
+          );
+          api.accessToken.setCustomClaim(
+            namespace + '/permissions',
+            event.authorization.permissions || []
+          );
+          api.idToken.setCustomClaim(
+            namespace + '/roles',
+            event.authorization.roles
+          );
+        }
+      };
+
+  - name: require-mfa-admin
+    trigger: post-login
+    description: "Require MFA for admin and ops_senior roles"
+    code: |
+      exports.onExecutePostLogin = async (event, api) => {
+        const adminRoles = ['SUPER_ADMIN', 'ADMIN', 'OPS_SENIOR'];
+        const userRoles = event.authorization?.roles || [];
+        const isAdmin = userRoles.some(r => adminRoles.includes(r));
+
+        if (isAdmin && !event.authentication?.methods?.find(m => m.name === 'mfa')) {
+          api.authentication.challengeWithAny([
+            { type: 'otp' },
+            { type: 'push-notification' }
+          ]);
+        }
+      };
