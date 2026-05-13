@@ -20,3 +20,4 @@ export * from './models/sla.types';
 export * from './api/api-response.types';
 export * from './api/pagination.types';
 export * from './kafka/kafka-events.types';
+export * as StorefrontTypes from './models/storefront.types';

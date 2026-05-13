@@ -4,7 +4,7 @@
 **Repository:** `affiliatedarchitecturegroup-byte/Lastmile-Gig-Ecosystem`  
 **Domain:** `lastmilegig.aagais.co.za`  
 **Parent Entity:** Affiliated Architecture Group (AAG)  
-**Last Updated:** 2026-05-10  
+**Last Updated:** 2026-05-13  
 
 ---
 
@@ -54,6 +54,24 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | Wave 4 | Complete | Route 53 + CloudFront + WAF + Monitoring (12 files) | 592 | 13,079 |
 | Wave 5 | Complete | SageMaker + Secrets Manager + Helm Charts (9 files) | ~450 | ~13,529 |
 
+#### Session 3-10 (2026-05-10 to 2026-05-13)
+
+*Sessions 3-10 covered Observability, Security, Database Schemas, Core Services, Driver Ecosystem, Order & Dispatch, and Real-Time Tracking. Cumulative LoC entering Session 11: 49,953*
+
+### Phase 2 - Restaurant Storefronts
+
+#### Session 11 (2026-05-13) - Restaurant Storefront Service (P176-P185)
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Sanity CMS Schemas (restaurant, menuCategory, menuItem, operatingHours, deliveryZone, partnerSettings) + Shared Types (9 files) | 1,308 | 51,261 |
+| Wave 2 | Complete | NestJS Storefront Service scaffold + Restaurant CRUD (controller, service, DTOs, health) (10 files) | 752 | 52,013 |
+| Wave 3 | Complete | Menu endpoints + Order placement + Partner analytics (controller, service, DTOs) (12 files) | 1,170 | 53,183 |
+| Wave 4 | Complete | Sanity webhook handler + OpenSearch search service + Sanity client + package.json + tsconfig (7 files) | 811 | 53,994 |
+| Wave 5 | Complete | Jest test suites (restaurant, menu, order, webhook) + Dockerfile + Helm chart (7 files) | 607 | 54,601 |
+
+**Session 11 Summary:** 4,648 LoC across 45 new files | TypeScript (NestJS), TypeScript (Sanity), YAML (Helm)
+
 ---
 
 ## Phase Group Progress
@@ -66,8 +84,8 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **D** | P071-P090 | Core Database Schemas | Not Started | 0/20 |
 | **E** | P091-P110 | Auth & API Gateway | Not Started | 0/20 |
 | **F** | P111-P145 | Driver Ecosystem | Not Started | 0/35 |
-| **G** | P146-P175 | Order & Dispatch | Not Started | 0/30 |
-| **H** | P176-P205 | Restaurant Storefronts | Not Started | 0/30 |
+| **G** | P146-P175 | Order & Dispatch | In Progress | 10/30 |
+| **H** | P176-P205 | Restaurant Storefronts | In Progress | 10/30 |
 | **I** | P206-P225 | Payments | Not Started | 0/20 |
 | **J** | P226-P245 | Blockchain & Security Layer | Not Started | 0/20 |
 | **K** | P246-P270 | AI & Agentic Layer | Not Started | 0/25 |
