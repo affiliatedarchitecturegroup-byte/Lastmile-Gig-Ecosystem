@@ -1,0 +1,20 @@
+# Helm Chart: Lastmile Gig Storefront Service (P180)
+# NestJS microservice for restaurant management, menus, orders, and analytics
+apiVersion: v2
+name: svc-storefronts
+description: |
+  Lastmile Gig Restaurant Storefront Service.
+  NestJS API handling restaurant CRUD, menu management,
+  order placement, partner analytics, and Sanity CMS webhook sync.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - lastmile-gig
+  - storefronts
+  - restaurants
+  - menus
+  - nestjs
+maintainers:
+  - name: AAG Engineering
+    email: engineering@aagais.co.za

@@ -1,0 +1,87 @@
+# Default values for svc-storefronts Helm chart
+# Lastmile Gig Restaurant Storefront Service
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/affiliatedarchitecturegroup-byte/lmg-storefronts
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: "svc-storefronts"
+
+service:
+  type: ClusterIP
+  port: 3005
+  targetPort: 3005
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: api.lastmilegig.aagais.co.za
+      paths:
+        - path: /v1/restaurants
+          pathType: Prefix
+        - path: /v1/menu
+          pathType: Prefix
+        - path: /v1/partners
+          pathType: Prefix
+        - path: /v1/webhooks
+          pathType: Prefix
+  tls:
+    - secretName: api-lastmilegig-tls
+      hosts:
+        - api.lastmilegig.aagais.co.za
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3005"
+  prometheus.io/path: "/v1/metrics"
+
+livenessProbe:
+  httpGet:
+    path: /v1/health
+    port: 3005
+  initialDelaySeconds: 15
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /v1/ready
+    port: 3005
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+env:
+  - name: LMG_STOREFRONT_PORT
+    value: "3005"
+  - name: NODE_ENV
+    value: "production"
+
+envFrom:
+  - secretRef:
+      name: svc-storefronts-secrets
+
+serviceAccount:
+  create: true
+  name: "svc-storefronts"
+
+namespace: lmg-core
