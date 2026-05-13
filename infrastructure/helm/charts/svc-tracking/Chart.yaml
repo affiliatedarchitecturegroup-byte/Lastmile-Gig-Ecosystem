@@ -1,0 +1,22 @@
+# Helm Chart: Lastmile Gig Real-Time Tracking Service (P175)
+# Elixir/Phoenix WebSocket service for real-time driver & order tracking
+apiVersion: v2
+name: svc-tracking
+description: |
+  Lastmile Gig Real-Time Tracking Service.
+  Elixir/Phoenix WebSocket service providing real-time driver location
+  tracking, order tracking, and Command Centre operations feed.
+  Runs as a 3-node BEAM cluster for HA WebSocket connections.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - lastmile-gig
+  - tracking
+  - websocket
+  - elixir
+  - phoenix
+  - real-time
+maintainers:
+  - name: AAG Engineering
+    email: engineering@aagais.co.za

@@ -1,0 +1,187 @@
+# Default values for svc-tracking Helm chart (P175)
+# Lastmile Gig Real-Time Tracking Service
+
+# ---------------------------------------------------------------------------
+# Deployment configuration
+# ---------------------------------------------------------------------------
+replicaCount: 3  # 3-node BEAM cluster for HA
+
+image:
+  repository: ghcr.io/affiliatedarchitecturegroup-byte/lmg-tracking
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: "svc-tracking"
+
+# ---------------------------------------------------------------------------
+# Service configuration
+# ---------------------------------------------------------------------------
+service:
+  type: ClusterIP
+  port: 7000
+  targetPort: 7000
+  # Headless service for BEAM cluster DNS discovery
+  headless:
+    enabled: true
+    name: svc-tracking-headless
+
+# ---------------------------------------------------------------------------
+# Ingress configuration
+# ---------------------------------------------------------------------------
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/websocket-services: "svc-tracking"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/connection-proxy-header: "keep-alive"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: ws.lastmilegig.aagais.co.za
+      paths:
+        - path: /tracking
+          pathType: Prefix
+  tls:
+    - secretName: ws-lastmilegig-tls
+      hosts:
+        - ws.lastmilegig.aagais.co.za
+
+# ---------------------------------------------------------------------------
+# Resource limits
+# ---------------------------------------------------------------------------
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+# ---------------------------------------------------------------------------
+# Autoscaling (HPA)
+# ---------------------------------------------------------------------------
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  # Custom metric: scale on active WebSocket connections
+  customMetrics:
+    - type: Pods
+      pods:
+        metric:
+          name: lmg_tracking_websocket_connections_total
+        target:
+          type: AverageValue
+          averageValue: "5000"
+
+# ---------------------------------------------------------------------------
+# Pod configuration
+# ---------------------------------------------------------------------------
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "7000"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# ---------------------------------------------------------------------------
+# Probes
+# ---------------------------------------------------------------------------
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 7000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 7000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# ---------------------------------------------------------------------------
+# Environment variables
+# ---------------------------------------------------------------------------
+env:
+  - name: LMG_TRACKING_PORT
+    value: "7000"
+  - name: LMG_TRACKING_HOST
+    value: "ws.lastmilegig.aagais.co.za"
+  - name: LMG_K8S_NAMESPACE
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.namespace
+  - name: LMG_K8S_SERVICE
+    value: "svc-tracking-headless"
+  - name: LMG_APP_NAME
+    value: "lmg_tracking"
+  - name: RELEASE_DISTRIBUTION
+    value: "name"
+  - name: RELEASE_NODE
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+
+# Secrets from Vault / K8s Secrets
+envFrom:
+  - secretRef:
+      name: svc-tracking-secrets
+
+# ---------------------------------------------------------------------------
+# Node affinity and anti-affinity
+# ---------------------------------------------------------------------------
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - svc-tracking
+          topologyKey: kubernetes.io/hostname
+
+# ---------------------------------------------------------------------------
+# Disruption budget
+# ---------------------------------------------------------------------------
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# ---------------------------------------------------------------------------
+# Service account
+# ---------------------------------------------------------------------------
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: ""
+  name: "svc-tracking"
+
+# ---------------------------------------------------------------------------
+# Namespace
+# ---------------------------------------------------------------------------
+namespace: lmg-realtime
