@@ -1,0 +1,15 @@
+apiVersion: v2
+name: svc-tracking
+description: Lastmile Gig Real-Time Tracking Service - WebSocket channels for live tracking
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - tracking
+  - elixir
+  - phoenix
+  - websocket
+  - lastmile-gig
+maintainers:
+  - name: AAG Engineering
+    email: engineering@aagais.co.za

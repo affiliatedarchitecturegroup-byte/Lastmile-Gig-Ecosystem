@@ -1,0 +1,71 @@
+# Default values for svc-dispatch Helm chart
+# @see docs/specs/08_INFRASTRUCTURE_IaC.md
+
+replicaCount: 3
+
+image:
+  repository: lastmilegig/svc-dispatch
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+nameOverride: ""
+fullnameOverride: "svc-dispatch"
+
+serviceAccount:
+  create: true
+  name: "svc-dispatch"
+
+service:
+  type: ClusterIP
+  port: 4000
+  targetPort: 4000
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 12
+  targetCPUUtilizationPercentage: 60
+
+env:
+  - name: LMG_PORT_DISPATCH_SERVICE
+    value: "4000"
+  - name: LMG_ENVIRONMENT
+    value: "production"
+  - name: LMG_UPSTASH_REDIS_URL
+    valueFrom:
+      secretKeyRef:
+        name: lmg-secrets
+        key: upstash-redis-url
+  - name: LMG_KAFKA_BROKERS
+    valueFrom:
+      configMapKeyRef:
+        name: lmg-kafka-config
+        key: brokers
+  - name: LMG_AI_SERVICE_GRPC_URL
+    value: "svc-ai:8000"
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 4000
+  initialDelaySeconds: 5
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 4000
+  initialDelaySeconds: 3
+  periodSeconds: 10
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

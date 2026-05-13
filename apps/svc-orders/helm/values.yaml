@@ -1,0 +1,85 @@
+# Default values for svc-orders Helm chart
+# @see docs/specs/08_INFRASTRUCTURE_IaC.md
+
+replicaCount: 2
+
+image:
+  repository: lastmilegig/svc-orders
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+nameOverride: ""
+fullnameOverride: "svc-orders"
+
+serviceAccount:
+  create: true
+  name: "svc-orders"
+
+service:
+  type: ClusterIP
+  port: 3003
+  targetPort: 3003
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+env:
+  - name: NODE_ENV
+    value: "production"
+  - name: LMG_PORT_ORDER_SERVICE
+    value: "3003"
+  - name: LMG_SUPABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: lmg-secrets
+        key: supabase-url
+  - name: LMG_SUPABASE_SERVICE_KEY
+    valueFrom:
+      secretKeyRef:
+        name: lmg-secrets
+        key: supabase-service-key
+  - name: LMG_KAFKA_BROKERS
+    valueFrom:
+      configMapKeyRef:
+        name: lmg-kafka-config
+        key: brokers
+  - name: LMG_MONGODB_URI
+    valueFrom:
+      secretKeyRef:
+        name: lmg-secrets
+        key: mongodb-uri
+
+livenessProbe:
+  httpGet:
+    path: /v1/orders/health
+    port: 3003
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  timeoutSeconds: 5
+
+readinessProbe:
+  httpGet:
+    path: /v1/orders/health
+    port: 3003
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

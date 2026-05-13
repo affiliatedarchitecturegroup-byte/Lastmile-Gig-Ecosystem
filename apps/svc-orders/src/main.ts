@@ -18,12 +18,30 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix('v1');
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
   );
 
-  const port = process.env.LMG_PORT_ORDER_SERVICE ?? 3003;
+  app.enableCors({
+    origin: [
+      'https://lastmilegig.aagais.co.za',
+      'https://ops.lastmilegig.aagais.co.za',
+      'https://admin.lastmilegig.aagais.co.za',
+      'https://command.lastmilegig.aagais.co.za',
+    ],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Trace-ID'],
+    credentials: true,
+  });
+
+  const port = process.env['LMG_PORT_ORDER_SERVICE'] ?? 3003;
   await app.listen(port);
   logger.log(`Order Service running on port ${port}`);
+  logger.log(`Health check: http://localhost:${port}/v1/orders/health`);
 }
 
 void bootstrap();
