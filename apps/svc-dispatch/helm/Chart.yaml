@@ -1,0 +1,14 @@
+apiVersion: v2
+name: svc-dispatch
+description: Lastmile Gig Dispatch Engine - Order-to-driver matching
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - dispatch
+  - go
+  - kafka
+  - lastmile-gig
+maintainers:
+  - name: AAG Engineering
+    email: engineering@aagais.co.za
