@@ -1,0 +1,52 @@
+{{- /* Service templates for svc-tracking (P175) */ -}}
+
+# Standard ClusterIP Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "svc-tracking.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "svc-tracking.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "svc-tracking.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+
+---
+
+# Headless Service for BEAM cluster DNS discovery
+{{- if .Values.service.headless.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.headless.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "svc-tracking.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: headless
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: http
+    - port: 4369
+      targetPort: 4369
+      protocol: TCP
+      name: epmd
+  selector:
+    app.kubernetes.io/name: {{ include "svc-tracking.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  publishNotReadyAddresses: true
+{{- end }}
