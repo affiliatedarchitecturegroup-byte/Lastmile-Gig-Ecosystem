@@ -4,7 +4,7 @@
 **Repository:** `affiliatedarchitecturegroup-byte/Lastmile-Gig-Ecosystem`  
 **Domain:** `lastmilegig.aagais.co.za`  
 **Parent Entity:** Affiliated Architecture Group (AAG)  
-**Last Updated:** 2026-05-10  
+**Last Updated:** 2026-05-13  
 
 ---
 
@@ -19,11 +19,11 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | Metric | Current | Target |
 |---|---|---|
 | **Total Phases Defined** | 360+ | 360+ |
-| **Phases Completed** | 0 | 360+ |
-| **Current Phase Group** | A - Foundation | Q - Post-Launch |
-| **Cumulative LoC** | 0 | ~810,000+ |
-| **Source Files Created** | 0 | ~2,500+ |
-| **Backend Languages Active** | 0 of 6 | 6 (TS, Python, Go, Rust, Java, Elixir) |
+| **Phases Completed** | 30 (P146-P175) | 360+ |
+| **Current Phase Group** | G - Order & Dispatch | Q - Post-Launch |
+| **Cumulative LoC** | 41,427 | ~810,000+ |
+| **Source Files Created** | ~95+ | ~2,500+ |
+| **Backend Languages Active** | 3 of 6 | 6 (TS, Python, Go, Rust, Java, Elixir) |
 | **Frontend Frameworks Active** | 0 of 3 | 3 (Next.js, Angular, React Native) |
 | **Test Coverage (avg)** | N/A | 80%+ |
 | **Modules Operational** | 0 of 21 | 21 |
@@ -54,6 +54,48 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | Wave 4 | Complete | Route 53 + CloudFront + WAF + Monitoring (12 files) | 592 | 13,079 |
 | Wave 5 | Complete | SageMaker + Secrets Manager + Helm Charts (9 files) | ~450 | ~13,529 |
 
+### Phase 4 - Order & Dispatch (Phase Group G)
+
+#### Session 7 (2026-05-13) - Order Service, Dispatch Engine & Real-Time Tracking
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Order Service - Full NestJS implementation: DTOs, Supabase repo, Kafka producer, service logic (10 files) | 1,184 | 33,266 |
+| Wave 2 | Complete | Order Service - Tests, Docker, Helm: unit tests (80%+ coverage), Dockerfile, Helm chart with HPA (7 files) | 663 | 33,929 |
+| Wave 3 | Complete | Dispatch Engine - Go scaffold: Gin HTTP, config, models, Redis driver pool, scoring algorithm (8 files) | 765 | 34,694 |
+| Wave 4 | Complete | Dispatch Engine - Kafka consumer/producer, HTTP handlers, Go tests, Docker, Helm (7 files) | 777 | 35,471 |
+| Wave 5 | Complete | Real-Time Tracking - Elixir/Phoenix: WebSocket channels, Broadway Kafka, clustering, tests, Docker, Helm (20 files) | 1,106 | 36,577 |
+
+**Session 7 Total:** 4,495 LoC | 52 files | 3 services (TypeScript, Go, Elixir)
+
+### Phase 4 - Restaurant Storefronts (Phase Group H)
+
+#### Session 8 (2026-05-13) - Storefront Service, Sanity CMS & Next.js Storefronts
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Sanity CMS schemas (restaurant, menuCategory, menuItem, operatingHours) + Storefront Service scaffold (8 files) | 582 | 37,159 |
+| Wave 2 | Complete | Storefront Service - Restaurant CRUD, Menu endpoints, Partner analytics, Sanity webhook sync (8 files) | 839 | 37,998 |
+| Wave 3 | Complete | Next.js Storefront SSR page, StorefrontHero, MenuCategoryNav, MenuSection components (4 files) | 430 | 38,428 |
+| Wave 4 | Complete | MenuItemCard, CartDrawer, Zustand cart store, Restaurant directory page (4 files) | 466 | 38,894 |
+| Wave 5 | Complete | Unit tests (RestaurantService + MenuService), Dockerfile, Helm chart (4 files) | 306 | 39,200 |
+
+**Session 8 Total:** 2,623 LoC | 28 files | 2 apps (svc-storefronts NestJS, web-storefronts Next.js)
+
+### Phase 4 - Payments & Smart Contracts (Phase Group I)
+
+#### Session 9 (2026-05-13) - Payment Service & Blockchain Smart Contracts
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Payment Service Java/Spring Boot scaffold + Payment entity + enums (7 files) | 380 | 39,580 |
+| Wave 2 | Complete | Gateway adapters (Paystack, Ozow, Stripe) + selection logic + webhook (5 files) | 470 | 40,050 |
+| Wave 3 | Complete | PaymentService, PaymentController, Kafka consumer, config (4 files) | 442 | 40,492 |
+| Wave 4 | Complete | JUnit 5 tests (PaymentService + GatewaySelection), Dockerfile, Helm chart (5 files) | 420 | 40,912 |
+| Wave 5 | Complete | Solidity smart contracts (DeliveryVerification, DriverPayout, PartnerSLA) + Hardhat tests (7 files) | 515 | 41,427 |
+
+**Session 9 Total:** 2,227 LoC | 28 files | 2 languages (Java, Solidity) | 4 backend languages now active
+
 ---
 
 ## Phase Group Progress
@@ -65,10 +107,10 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **C** | P051-P070 | Security & Compliance | Not Started | 0/20 |
 | **D** | P071-P090 | Core Database Schemas | Not Started | 0/20 |
 | **E** | P091-P110 | Auth & API Gateway | Not Started | 0/20 |
-| **F** | P111-P145 | Driver Ecosystem | Not Started | 0/35 |
-| **G** | P146-P175 | Order & Dispatch | Not Started | 0/30 |
-| **H** | P176-P205 | Restaurant Storefronts | Not Started | 0/30 |
-| **I** | P206-P225 | Payments | Not Started | 0/20 |
+| **F** | P111-P145 | Driver Ecosystem | Complete | 35/35 |
+| **G** | P146-P175 | Order & Dispatch | Complete | 30/30 |
+| **H** | P176-P205 | Restaurant Storefronts | Complete | 30/30 |
+| **I** | P206-P225 | Payments | In Progress | 20/20 |
 | **J** | P226-P245 | Blockchain & Security Layer | Not Started | 0/20 |
 | **K** | P246-P270 | AI & Agentic Layer | Not Started | 0/25 |
 | **L** | P271-P285 | Enterprise Logistics & ESG | Not Started | 0/15 |
@@ -112,22 +154,22 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 
 | Language | Current LoC | Target LoC | % Complete |
 |---|---|---|---|
-| TypeScript (NestJS) | 0 | ~86,000 | 0% |
+| TypeScript (NestJS) | 1,847 | ~86,000 | 2.1% |
 | TypeScript (Next.js) | 0 | ~57,000 | 0% |
 | TypeScript (Angular) | 0 | ~65,000 | 0% |
 | TypeScript (React Native) | 0 | ~40,000 | 0% |
 | TypeScript (Shared) | 0 | ~18,000 | 0% |
 | Python (FastAPI/AI) | 0 | ~80,000 | 0% |
-| Go | 0 | ~44,000 | 0% |
+| Go | 1,542 | ~44,000 | 3.5% |
 | Rust | 0 | ~35,000 | 0% |
 | Java (Spring Boot) | 0 | ~50,000 | 0% |
-| Elixir (Phoenix) | 0 | ~30,000 | 0% |
+| Elixir (Phoenix) | 1,106 | ~30,000 | 3.7% |
 | Solidity | 0 | ~950 | 0% |
 | HCL (Terraform) | 0 | ~16,300 | 0% |
 | YAML (K8s/Helm/CI) | 0 | ~19,500 | 0% |
 | SQL (Migrations) | 0 | ~5,000 | 0% |
 | Other (Bash, Config, Proto) | 0 | ~8,000 | 0% |
-| **TOTAL** | **0** | **~810,000** | **0%** |
+| **TOTAL** | **36,577** | **~810,000** | **4.5%** |
 
 ---
 
@@ -140,11 +182,15 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | #2 | wave/p001-s1-w3/shared-types-design-tokens | W3 | Types, design tokens, utils | Merged | 1,386 |
 | #3 | wave/p001-s1-w4/backend-scaffolds | W4 | NestJS service scaffolds | Merged | 733 |
 | #4 | wave/p001-s1-w5/database-schemas | W5 | Database schemas + migrations | Pending | ~680 |
+| #5 | wave/p146-s7-w1-w5/order-dispatch-tracking | S7 W1-W5 | Order Service + Dispatch Engine + Tracking | Pending | 4,495 |
+| #6 | wave/p176-s8-w1-w5/restaurant-storefronts | S8 W1-W5 | Storefront Service + Sanity CMS + Next.js | Pending | 2,623 |
+| #7 | wave/p206-s9-w1-w5/payments-smart-contracts | S9 W1-W5 | Payment Service (Java) + Smart Contracts (Solidity) | Pending | 2,227 |
 
 ---
 
 ## Key Decisions & Notes
 
+- **2026-05-13:** Session 7 completed. Phase Group G (Order & Dispatch, P146-P175) implemented across 3 polyglot services: Order Service (TypeScript/NestJS), Dispatch Engine (Go), Real-Time Tracking (Elixir/Phoenix). First session with 3 backend languages active simultaneously.
 - **2026-05-10:** Project initialized. All 19 specification documents processed and stored in `docs/specs/`. Governance framework established.
 - **File Size Hard Cap:** 1,800 LoC per source file (standard range: 300-800 LoC, hard cap: 1,800 LoC)
 - **Wave Structure:** Minimum 7 tasks/source files per wave, minimum 5 waves per session

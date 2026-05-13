@@ -1,0 +1,55 @@
+# Payment Service Configuration
+# @see docs/specs/04_BACKEND_MICROSERVICES.md - Section 2.12
+# @port 6000
+
+server:
+  port: ${LMG_PORT_PAYMENT_SERVICE:6000}
+
+spring:
+  application:
+    name: svc-payments
+
+  datasource:
+    url: ${LMG_SUPABASE_JDBC_URL:jdbc:postgresql://localhost:5432/lastmilegig}
+    username: ${LMG_SUPABASE_DB_USER:postgres}
+    password: ${LMG_SUPABASE_DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+
+  kafka:
+    bootstrap-servers: ${LMG_KAFKA_BROKERS:localhost:9092}
+    consumer:
+      group-id: svc-payments
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+# Gateway configuration
+lmg:
+  paystack:
+    secret-key: ${LMG_PAYSTACK_SECRET_KEY:sk_test_placeholder}
+  stripe:
+    secret-key: ${LMG_STRIPE_SECRET_KEY:sk_test_placeholder}
+  ozow:
+    api-key: ${LMG_OZOW_API_KEY:ozow_test_placeholder}
+    site-code: ${LMG_OZOW_SITE_CODE:placeholder}
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always

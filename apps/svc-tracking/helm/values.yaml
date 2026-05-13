@@ -1,0 +1,95 @@
+# Default values for svc-tracking Helm chart
+# @see docs/specs/08_INFRASTRUCTURE_IaC.md
+
+replicaCount: 3
+
+image:
+  repository: lastmilegig/svc-tracking
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+nameOverride: ""
+fullnameOverride: "svc-tracking"
+
+serviceAccount:
+  create: true
+  name: "svc-tracking"
+
+# Main service for WebSocket traffic
+service:
+  type: ClusterIP
+  port: 7000
+  targetPort: 7000
+
+# Headless service for BEAM clustering
+headlessService:
+  enabled: true
+  name: "svc-tracking-headless"
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+env:
+  - name: PORT
+    value: "7000"
+  - name: PHX_HOST
+    value: "0.0.0.0"
+  - name: MIX_ENV
+    value: "prod"
+  - name: LMG_UPSTASH_REDIS_URL
+    valueFrom:
+      secretKeyRef:
+        name: lmg-secrets
+        key: upstash-redis-url
+  - name: LMG_KAFKA_BROKERS
+    valueFrom:
+      configMapKeyRef:
+        name: lmg-kafka-config
+        key: brokers
+  - name: LMG_SECRET_KEY_BASE
+    valueFrom:
+      secretKeyRef:
+        name: lmg-secrets
+        key: phoenix-secret-key-base
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 7000
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 7000
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+nodeSelector: {}
+tolerations: []
+
+# Anti-affinity to spread tracking pods across nodes
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - svc-tracking
+          topologyKey: kubernetes.io/hostname

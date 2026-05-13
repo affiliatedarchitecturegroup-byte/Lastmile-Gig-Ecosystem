@@ -1,0 +1,52 @@
+# Default values for svc-storefronts Helm chart
+replicaCount: 2
+
+image:
+  repository: lastmilegig/svc-storefronts
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+fullnameOverride: "svc-storefronts"
+
+service:
+  type: ClusterIP
+  port: 3005
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+env:
+  - name: NODE_ENV
+    value: "production"
+  - name: LMG_PORT_STOREFRONT_SERVICE
+    value: "3005"
+  - name: LMG_MONGODB_URI
+    valueFrom:
+      secretKeyRef:
+        name: lmg-secrets
+        key: mongodb-uri
+
+livenessProbe:
+  httpGet:
+    path: /v1/restaurants/health
+    port: 3005
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+readinessProbe:
+  httpGet:
+    path: /v1/restaurants/health
+    port: 3005
+  initialDelaySeconds: 5
+  periodSeconds: 10
