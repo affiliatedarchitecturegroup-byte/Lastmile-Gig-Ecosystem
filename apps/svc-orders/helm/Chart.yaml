@@ -1,0 +1,13 @@
+apiVersion: v2
+name: svc-orders
+description: Lastmile Gig Order Service - Order lifecycle management
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - orders
+  - nestjs
+  - lastmile-gig
+maintainers:
+  - name: AAG Engineering
+    email: engineering@aagais.co.za
