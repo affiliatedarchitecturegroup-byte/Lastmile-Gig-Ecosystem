@@ -1,0 +1,14 @@
+apiVersion: v2
+name: svc-payments
+description: Lastmile Gig Payment Service - Unified payment gateway abstraction
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - payments
+  - java
+  - spring-boot
+  - lastmile-gig
+maintainers:
+  - name: AAG Engineering
+    email: engineering@aagais.co.za

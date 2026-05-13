@@ -21,7 +21,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **Total Phases Defined** | 360+ | 360+ |
 | **Phases Completed** | 30 (P146-P175) | 360+ |
 | **Current Phase Group** | G - Order & Dispatch | Q - Post-Launch |
-| **Cumulative LoC** | 39,200 | ~810,000+ |
+| **Cumulative LoC** | 41,427 | ~810,000+ |
 | **Source Files Created** | ~95+ | ~2,500+ |
 | **Backend Languages Active** | 3 of 6 | 6 (TS, Python, Go, Rust, Java, Elixir) |
 | **Frontend Frameworks Active** | 0 of 3 | 3 (Next.js, Angular, React Native) |
@@ -82,6 +82,20 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 
 **Session 8 Total:** 2,623 LoC | 28 files | 2 apps (svc-storefronts NestJS, web-storefronts Next.js)
 
+### Phase 4 - Payments & Smart Contracts (Phase Group I)
+
+#### Session 9 (2026-05-13) - Payment Service & Blockchain Smart Contracts
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Payment Service Java/Spring Boot scaffold + Payment entity + enums (7 files) | 380 | 39,580 |
+| Wave 2 | Complete | Gateway adapters (Paystack, Ozow, Stripe) + selection logic + webhook (5 files) | 470 | 40,050 |
+| Wave 3 | Complete | PaymentService, PaymentController, Kafka consumer, config (4 files) | 442 | 40,492 |
+| Wave 4 | Complete | JUnit 5 tests (PaymentService + GatewaySelection), Dockerfile, Helm chart (5 files) | 420 | 40,912 |
+| Wave 5 | Complete | Solidity smart contracts (DeliveryVerification, DriverPayout, PartnerSLA) + Hardhat tests (7 files) | 515 | 41,427 |
+
+**Session 9 Total:** 2,227 LoC | 28 files | 2 languages (Java, Solidity) | 4 backend languages now active
+
 ---
 
 ## Phase Group Progress
@@ -95,8 +109,8 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **E** | P091-P110 | Auth & API Gateway | Not Started | 0/20 |
 | **F** | P111-P145 | Driver Ecosystem | Complete | 35/35 |
 | **G** | P146-P175 | Order & Dispatch | Complete | 30/30 |
-| **H** | P176-P205 | Restaurant Storefronts | In Progress | 30/30 |
-| **I** | P206-P225 | Payments | Not Started | 0/20 |
+| **H** | P176-P205 | Restaurant Storefronts | Complete | 30/30 |
+| **I** | P206-P225 | Payments | In Progress | 20/20 |
 | **J** | P226-P245 | Blockchain & Security Layer | Not Started | 0/20 |
 | **K** | P246-P270 | AI & Agentic Layer | Not Started | 0/25 |
 | **L** | P271-P285 | Enterprise Logistics & ESG | Not Started | 0/15 |
@@ -170,6 +184,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | #4 | wave/p001-s1-w5/database-schemas | W5 | Database schemas + migrations | Pending | ~680 |
 | #5 | wave/p146-s7-w1-w5/order-dispatch-tracking | S7 W1-W5 | Order Service + Dispatch Engine + Tracking | Pending | 4,495 |
 | #6 | wave/p176-s8-w1-w5/restaurant-storefronts | S8 W1-W5 | Storefront Service + Sanity CMS + Next.js | Pending | 2,623 |
+| #7 | wave/p206-s9-w1-w5/payments-smart-contracts | S9 W1-W5 | Payment Service (Java) + Smart Contracts (Solidity) | Pending | 2,227 |
 
 ---
 

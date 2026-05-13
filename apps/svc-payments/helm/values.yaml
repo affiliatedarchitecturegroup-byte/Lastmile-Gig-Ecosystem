@@ -1,0 +1,65 @@
+# Default values for svc-payments Helm chart
+replicaCount: 2
+
+image:
+  repository: lastmilegig/svc-payments
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+fullnameOverride: "svc-payments"
+
+service:
+  type: ClusterIP
+  port: 6000
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+env:
+  - name: SERVER_PORT
+    value: "6000"
+  - name: LMG_SUPABASE_JDBC_URL
+    valueFrom:
+      secretKeyRef:
+        name: lmg-secrets
+        key: supabase-jdbc-url
+  - name: LMG_KAFKA_BROKERS
+    valueFrom:
+      configMapKeyRef:
+        name: lmg-kafka-config
+        key: brokers
+  - name: LMG_PAYSTACK_SECRET_KEY
+    valueFrom:
+      secretKeyRef:
+        name: lmg-payment-secrets
+        key: paystack-secret-key
+  - name: LMG_OZOW_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: lmg-payment-secrets
+        key: ozow-api-key
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health
+    port: 6000
+  initialDelaySeconds: 30
+  periodSeconds: 20
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 6000
+  initialDelaySeconds: 15
+  periodSeconds: 10
