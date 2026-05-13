@@ -1,0 +1,14 @@
+apiVersion: v2
+name: svc-storefronts
+description: Lastmile Gig Storefront Service - Restaurant menus and partner management
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - storefronts
+  - restaurants
+  - nestjs
+  - lastmile-gig
+maintainers:
+  - name: AAG Engineering
+    email: engineering@aagais.co.za

@@ -21,7 +21,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **Total Phases Defined** | 360+ | 360+ |
 | **Phases Completed** | 30 (P146-P175) | 360+ |
 | **Current Phase Group** | G - Order & Dispatch | Q - Post-Launch |
-| **Cumulative LoC** | 36,577 | ~810,000+ |
+| **Cumulative LoC** | 39,200 | ~810,000+ |
 | **Source Files Created** | ~95+ | ~2,500+ |
 | **Backend Languages Active** | 3 of 6 | 6 (TS, Python, Go, Rust, Java, Elixir) |
 | **Frontend Frameworks Active** | 0 of 3 | 3 (Next.js, Angular, React Native) |
@@ -68,6 +68,20 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 
 **Session 7 Total:** 4,495 LoC | 52 files | 3 services (TypeScript, Go, Elixir)
 
+### Phase 4 - Restaurant Storefronts (Phase Group H)
+
+#### Session 8 (2026-05-13) - Storefront Service, Sanity CMS & Next.js Storefronts
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Sanity CMS schemas (restaurant, menuCategory, menuItem, operatingHours) + Storefront Service scaffold (8 files) | 582 | 37,159 |
+| Wave 2 | Complete | Storefront Service - Restaurant CRUD, Menu endpoints, Partner analytics, Sanity webhook sync (8 files) | 839 | 37,998 |
+| Wave 3 | Complete | Next.js Storefront SSR page, StorefrontHero, MenuCategoryNav, MenuSection components (4 files) | 430 | 38,428 |
+| Wave 4 | Complete | MenuItemCard, CartDrawer, Zustand cart store, Restaurant directory page (4 files) | 466 | 38,894 |
+| Wave 5 | Complete | Unit tests (RestaurantService + MenuService), Dockerfile, Helm chart (4 files) | 306 | 39,200 |
+
+**Session 8 Total:** 2,623 LoC | 28 files | 2 apps (svc-storefronts NestJS, web-storefronts Next.js)
+
 ---
 
 ## Phase Group Progress
@@ -80,8 +94,8 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **D** | P071-P090 | Core Database Schemas | Not Started | 0/20 |
 | **E** | P091-P110 | Auth & API Gateway | Not Started | 0/20 |
 | **F** | P111-P145 | Driver Ecosystem | Complete | 35/35 |
-| **G** | P146-P175 | Order & Dispatch | In Progress | 30/30 |
-| **H** | P176-P205 | Restaurant Storefronts | Not Started | 0/30 |
+| **G** | P146-P175 | Order & Dispatch | Complete | 30/30 |
+| **H** | P176-P205 | Restaurant Storefronts | In Progress | 30/30 |
 | **I** | P206-P225 | Payments | Not Started | 0/20 |
 | **J** | P226-P245 | Blockchain & Security Layer | Not Started | 0/20 |
 | **K** | P246-P270 | AI & Agentic Layer | Not Started | 0/25 |
@@ -155,6 +169,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | #3 | wave/p001-s1-w4/backend-scaffolds | W4 | NestJS service scaffolds | Merged | 733 |
 | #4 | wave/p001-s1-w5/database-schemas | W5 | Database schemas + migrations | Pending | ~680 |
 | #5 | wave/p146-s7-w1-w5/order-dispatch-tracking | S7 W1-W5 | Order Service + Dispatch Engine + Tracking | Pending | 4,495 |
+| #6 | wave/p176-s8-w1-w5/restaurant-storefronts | S8 W1-W5 | Storefront Service + Sanity CMS + Next.js | Pending | 2,623 |
 
 ---
 
