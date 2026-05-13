@@ -21,7 +21,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **Total Phases Defined** | 360+ | 360+ |
 | **Phases Completed** | 0 | 360+ |
 | **Current Phase Group** | A - Foundation | Q - Post-Launch |
-| **Cumulative LoC** | 0 | ~810,000+ |
+| **Cumulative LoC** | 56,771 | ~810,000+ |
 | **Source Files Created** | 0 | ~2,500+ |
 | **Backend Languages Active** | 0 of 6 | 6 (TS, Python, Go, Rust, Java, Elixir) |
 | **Frontend Frameworks Active** | 0 of 3 | 3 (Next.js, Angular, React Native) |
@@ -54,6 +54,21 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | Wave 4 | Complete | Route 53 + CloudFront + WAF + Monitoring (12 files) | 592 | 13,079 |
 | Wave 5 | Complete | SageMaker + Secrets Manager + Helm Charts (9 files) | ~450 | ~13,529 |
 
+#### Session 3-11 (2026-05-10 to 2026-05-13)
+
+*Sessions 3-11 covered Observability, Security, DB Schemas, Core Services, Driver Ecosystem, Order & Dispatch, Real-Time Tracking, and Storefront Service backend. Cumulative LoC entering Session 12: 54,601*
+
+#### Session 12 (2026-05-13) - Next.js Storefront Pages (P186-P195)
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | SSR Storefront Page + StorefrontHero + Layout + Footer + Header + MenuGrid + API Client + 404 (8 files) | 909 | 55,510 |
+| Wave 2 | Complete | MenuCategoryNav + MenuItemCard + CartDrawer (3 files) | 591 | 56,101 |
+| Wave 3 | Complete | CheckoutFlow (multi-step) + Checkout Page (2 files) | 323 | 56,424 |
+| Wave 4 | Complete | Partner Directory Page + SearchBar component (2 files) | 347 | 56,771 |
+
+**Session 12 Summary:** 2,170 LoC across 15 new files | TypeScript (Next.js 14, React)
+
 ---
 
 ## Phase Group Progress
@@ -67,7 +82,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **E** | P091-P110 | Auth & API Gateway | Not Started | 0/20 |
 | **F** | P111-P145 | Driver Ecosystem | Not Started | 0/35 |
 | **G** | P146-P175 | Order & Dispatch | Not Started | 0/30 |
-| **H** | P176-P205 | Restaurant Storefronts | Not Started | 0/30 |
+| **H** | P176-P205 | Restaurant Storefronts | In Progress | 20/30 |
 | **I** | P206-P225 | Payments | Not Started | 0/20 |
 | **J** | P226-P245 | Blockchain & Security Layer | Not Started | 0/20 |
 | **K** | P246-P270 | AI & Agentic Layer | Not Started | 0/25 |
