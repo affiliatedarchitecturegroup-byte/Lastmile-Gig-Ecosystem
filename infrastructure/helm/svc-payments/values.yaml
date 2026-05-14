@@ -1,0 +1,84 @@
+# =============================================================================
+# Lastmile Gig - svc-payments Helm Values
+# Phase P220 - Payment Service Docker + Helm
+# =============================================================================
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/affiliatedarchitecturegroup-byte/lmg-svc-payments
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets:
+  - name: ghcr-pull-secret
+
+fullnameOverride: "svc-payments"
+
+serviceAccount:
+  create: true
+  name: "svc-payments"
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3006"
+  prometheus.io/path: "/actuator/prometheus"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+
+service:
+  type: ClusterIP
+  port: 3006
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 3006
+  initialDelaySeconds: 30
+  periodSeconds: 30
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 3006
+  initialDelaySeconds: 15
+  periodSeconds: 10
+
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "production"
+  - name: JAVA_OPTS
+    value: "-Xms256m -Xmx512m -XX:+UseG1GC"
+
+envFrom:
+  - secretRef:
+      name: svc-payments-secrets
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - svc-payments
+          topologyKey: kubernetes.io/hostname
