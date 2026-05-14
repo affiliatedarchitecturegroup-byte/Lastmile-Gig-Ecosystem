@@ -1,0 +1,71 @@
+# =============================================================================
+# Lastmile Gig - web-storefronts (Next.js 14)
+# Multi-stage Docker build for production deployment
+# Phase P202 - Storefront Service Docker + Helm
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Stage 1: Dependencies
+# ---------------------------------------------------------------------------
+FROM node:20-alpine AS deps
+WORKDIR /app
+
+# Install libc6-compat for Alpine
+RUN apk add --no-cache libc6-compat
+
+# Copy package manifests
+COPY package.json package-lock.json* ./
+
+# Install production dependencies only
+RUN npm ci --omit=dev --ignore-scripts
+
+# ---------------------------------------------------------------------------
+# Stage 2: Builder
+# ---------------------------------------------------------------------------
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Set Next.js telemetry opt-out
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
+# Build the Next.js application
+RUN npm run build
+
+# ---------------------------------------------------------------------------
+# Stage 3: Runner (Production)
+# ---------------------------------------------------------------------------
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Security: Run as non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Set production environment
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Copy built assets from builder
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Switch to non-root user
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+
+# Start the application
+CMD ["node", "server.js"]

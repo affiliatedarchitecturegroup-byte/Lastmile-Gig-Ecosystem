@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Build output
+.next
+out
+
+# IDE and OS files
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Test files
+__tests__
+*.spec.ts
+*.spec.tsx
+*.test.ts
+*.test.tsx
+coverage
+.nyc_output
+
+# Playwright
+e2e
+playwright-report
+test-results
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+LICENSE
+
+# Environment files (secrets managed via Vault/K8s secrets)
+.env*
+!.env.example
