@@ -1,0 +1,19 @@
+# =============================================================================
+# Lastmile Gig - web-storefronts Helm Chart
+# Phase P202 - Storefront Service Docker + Helm
+# =============================================================================
+apiVersion: v2
+name: web-storefronts
+description: Lastmile Gig Restaurant Storefront - Next.js 14 SSR Application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - lastmile-gig
+  - storefronts
+  - nextjs
+  - restaurant
+  - ssr
+maintainers:
+  - name: AAG Engineering
+    email: engineering@aagais.co.za
