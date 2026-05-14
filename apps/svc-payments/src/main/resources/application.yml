@@ -1,0 +1,86 @@
+# =============================================================================
+# Lastmile Gig - Payment Service Configuration
+# Phase P206 - Payment Service Java/Spring Boot Scaffold
+# =============================================================================
+
+spring:
+  application:
+    name: svc-payments
+
+  datasource:
+    url: ${LMG_SUPABASE_JDBC_URL:jdbc:postgresql://localhost:5432/lastmilegig}
+    username: ${LMG_SUPABASE_DB_USER:postgres}
+    password: ${LMG_SUPABASE_DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    open-in-view: false
+
+  kafka:
+    bootstrap-servers: ${LMG_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: svc-payments
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+server:
+  port: ${PORT:3006}
+
+# Payment Gateway Configuration
+lmg:
+  paystack:
+    secret-key: ${LMG_PAYSTACK_SECRET_KEY:}
+    public-key: ${LMG_PAYSTACK_PUBLIC_KEY:}
+    webhook-secret: ${LMG_PAYSTACK_WEBHOOK_SECRET:}
+  stripe:
+    secret-key: ${LMG_STRIPE_SECRET_KEY:}
+    webhook-secret: ${LMG_STRIPE_WEBHOOK_SECRET:}
+  ozow:
+    api-key: ${LMG_OZOW_API_KEY:}
+    private-key: ${LMG_OZOW_PRIVATE_KEY:}
+    site-code: ${LMG_OZOW_SITE_CODE:}
+  peach:
+    api-key: ${LMG_PEACH_API_KEY:}
+    entity-id: ${LMG_PEACH_ENTITY_ID:}
+  flutterwave:
+    secret-key: ${LMG_FLUTTERWAVE_SECRET_KEY:}
+    webhook-secret: ${LMG_FLUTTERWAVE_WEBHOOK_SECRET:}
+
+  # Commission configuration
+  commission:
+    platform-rate: 0.15
+    driver-rate: 0.75
+    partner-rate: 0.10
+
+# Actuator & Observability
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: svc-payments
+    export:
+      prometheus:
+        enabled: true
+
+# OpenAPI
+springdoc:
+  api-docs:
+    path: /v1/payments/docs
+  swagger-ui:
+    path: /v1/payments/swagger-ui
