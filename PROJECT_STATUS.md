@@ -54,6 +54,45 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | Wave 4 | Complete | Route 53 + CloudFront + WAF + Monitoring (12 files) | 592 | 13,079 |
 | Wave 5 | Complete | SageMaker + Secrets Manager + Helm Charts (9 files) | ~450 | ~13,529 |
 
+#### Sessions 3-12 - Observability through Storefronts (P031-P195)
+**Cumulative LoC at end of Session 12: 56,344**
+
+#### Session 13 (2026-05-14) - Restaurant Storefronts Final (P196-P205)
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Partner Admin Dashboard + Order Queue (10 files) | 2,057 | 58,401 |
+| Wave 2 | Complete | Partner Analytics + Menu Extraction AI (10 files) | 1,798 | 60,199 |
+| Wave 3 | Complete | SEO Meta Tags + Unit Tests (9 files) | 1,645 | 61,844 |
+| Wave 4 | Complete | Docker/Helm + Playwright E2E Tests (9 files) | 810 | 62,654 |
+| Wave 5 | Complete | Performance Optimization + Partner Onboarding (6 files) | 1,360 | 64,014 |
+
+**Session 13 Totals:** 44 files | 7,670 LoC | Cumulative: 64,014
+
+#### Session 14 (2026-05-14) - Payments Service (P206-P215)
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Java/Spring Boot Scaffold + Paystack Gateway (15 files) | 1,391 | 65,405 |
+| Wave 2 | Complete | Stripe + Ozow Gateways (2 files) | 416 | 65,821 |
+| Wave 3 | Complete | Peach Payments + Flutterwave (2 files) | 333 | 66,154 |
+| Wave 4 | Complete | NestJS Webhook Receiver (2 files) | 275 | 66,429 |
+| Wave 5 | Complete | Kafka Consumer + Driver Payout Service (3 files) | 459 | 66,888 |
+
+**Session 14 Totals:** 24 files | 2,874 LoC | Cumulative: 66,888
+
+#### Session 15 (2026-05-14) - Payments Completion + Smart Contracts (P216-P225)
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Reconciliation Engine + Refund Processing (2 files) | 364 | 67,252 |
+| Wave 2 | Complete | Invoice Generation + JUnit 5 Unit Tests (4 files) | 581 | 67,833 |
+| Wave 3 | Complete | Payment Service Docker + Helm Chart (3 files) | 150 | 67,983 |
+| Wave 4 | Complete | Hardhat Setup + DeliveryVerification.sol (4 files) | 265 | 68,248 |
+| Wave 5 | Complete | DriverPayout.sol + PartnerSLA.sol + Deploy Script (3 files) | 406 | 68,654 |
+
+**Session 15 Totals:** 16 files | 1,766 LoC | Cumulative: 68,654
+
 ---
 
 ## Phase Group Progress

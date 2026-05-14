@@ -1,0 +1,19 @@
+{
+  "name": "@lastmilegig/contracts",
+  "version": "1.0.0",
+  "description": "Lastmile Gig smart contracts - Polygon CDK",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network polygonCdkTestnet",
+    "deploy:mainnet": "hardhat run scripts/deploy.ts --network polygonCdkMainnet",
+    "clean": "hardhat clean"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0",
+    "typescript": "^5.4.0"
+  }
+}
