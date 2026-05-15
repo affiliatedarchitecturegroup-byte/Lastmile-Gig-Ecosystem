@@ -1,0 +1,193 @@
+# CI/CD Pipeline - Smart Contracts
+#
+# Runs on PRs that touch contracts/solidity/**
+# Compiles, tests, and reports gas usage for all Solidity contracts.
+#
+# See: docs/specs/13_DEVOPS_CICD.md
+# See: docs/specs/06_BLOCKCHAIN_LAYER.md - Section 5
+
+name: Smart Contracts CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'contracts/solidity/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'contracts/solidity/**'
+
+defaults:
+  run:
+    working-directory: contracts/solidity
+
+jobs:
+  compile:
+    name: Compile Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: contracts/solidity/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile contracts
+        run: npx hardhat compile
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-artifacts
+          path: contracts/solidity/artifacts/
+          retention-days: 7
+
+  test:
+    name: Test Contracts
+    runs-on: ubuntu-latest
+    needs: compile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: contracts/solidity/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npx hardhat test
+        env:
+          REPORT_GAS: 'true'
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: contracts/solidity/gas-report.txt
+          retention-days: 7
+
+  coverage:
+    name: Test Coverage
+    runs-on: ubuntu-latest
+    needs: compile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: contracts/solidity/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run coverage
+        run: npx hardhat coverage
+
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          echo "Coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 95" | bc -l) )); then
+            echo "Coverage $COVERAGE% is below 95% threshold"
+            exit 1
+          fi
+
+  lint:
+    name: Lint Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: contracts/solidity/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run solhint
+        run: npx solhint 'contracts/**/*.sol'
+
+  security:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    needs: compile
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: contracts/solidity/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile contracts
+        run: npx hardhat compile
+
+      # Slither requires Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Slither
+        run: pip install slither-analyzer
+
+      - name: Run Slither
+        run: slither contracts/ --config-file .slither.json || true
+        continue-on-error: true
+
+  export-abi:
+    name: Export ABIs
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: contracts/solidity/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile contracts
+        run: npx hardhat compile
+
+      - name: Export ABIs
+        run: npx hardhat run scripts/export-abi.ts
+
+      - name: Upload ABIs
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-abis
+          path: contracts/solidity/abi/
+          retention-days: 30

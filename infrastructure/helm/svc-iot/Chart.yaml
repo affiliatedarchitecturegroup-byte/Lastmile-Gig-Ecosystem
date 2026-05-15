@@ -1,0 +1,20 @@
+apiVersion: v2
+name: svc-iot
+description: Lastmile Gig IoT Telemetry Service - MQTT ingestion and TimescaleDB storage
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - iot
+  - telemetry
+  - mqtt
+  - timescaledb
+  - rust
+  - axum
+maintainers:
+  - name: Lastmile Gig Engineering
+    email: dev@aagais.co.za
+home: https://lastmilegig.aagais.co.za
+sources:
+  - https://github.com/affiliatedarchitecturegroup-byte/Lastmile-Gig-Ecosystem
+dependencies: []

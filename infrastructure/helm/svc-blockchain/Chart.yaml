@@ -1,0 +1,19 @@
+apiVersion: v2
+name: svc-blockchain
+description: Lastmile Gig Blockchain Service - Polygon CDK interface via Rust/Axum
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - blockchain
+  - polygon
+  - rust
+  - axum
+  - smart-contracts
+maintainers:
+  - name: Lastmile Gig Engineering
+    email: dev@aagais.co.za
+home: https://lastmilegig.aagais.co.za
+sources:
+  - https://github.com/affiliatedarchitecturegroup-byte/Lastmile-Gig-Ecosystem
+dependencies: []

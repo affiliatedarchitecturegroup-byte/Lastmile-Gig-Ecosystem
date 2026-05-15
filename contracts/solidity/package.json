@@ -1,0 +1,40 @@
+{
+  "name": "@lastmile-gig/smart-contracts",
+  "version": "1.0.0",
+  "description": "Lastmile Gig Ecosystem - Polygon CDK Smart Contracts",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network polygonCDKTestnet",
+    "deploy:mainnet": "hardhat run scripts/deploy.ts --network polygonCDKMainnet",
+    "lint:sol": "solhint 'contracts/**/*.sol'",
+    "clean": "hardhat clean",
+    "gas-report": "REPORT_GAS=true hardhat test",
+    "slither": "slither contracts/",
+    "verify": "hardhat verify"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@typechain/hardhat": "^9.0.0",
+    "@typechain/ethers-v6": "^0.5.0",
+    "hardhat": "^2.22.0",
+    "hardhat-gas-reporter": "^2.0.0",
+    "solidity-coverage": "^0.8.0",
+    "solhint": "^4.5.0",
+    "ethers": "^6.11.0",
+    "chai": "^4.4.0",
+    "typechain": "^8.3.0",
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^10.0.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  }
+}

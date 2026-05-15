@@ -1,0 +1,49 @@
+# Production values for svc-blockchain
+# Overrides default values for production deployment
+
+replicaCount: 3
+
+image:
+  pullPolicy: Always
+
+env:
+  LMG_BLOCKCHAIN_PORT: "5000"
+  LMG_BLOCKCHAIN_CHAIN_ID: "1101"
+  LMG_BLOCKCHAIN_NETWORK_NAME: "polygon-cdk-mainnet"
+  LMG_BLOCKCHAIN_ENABLE_GAS_ESTIMATION: "true"
+  LMG_BLOCKCHAIN_MAX_GAS_PRICE_GWEI: "30"
+  LMG_BLOCKCHAIN_TX_TIMEOUT_SECS: "180"
+  LMG_BLOCKCHAIN_CONFIRMATIONS: "5"
+  LMG_BLOCKCHAIN_LOG_LEVEL: "warn"
+  RUST_LOG: "svc_blockchain=warn,tower_http=warn"
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  hosts:
+    - host: blockchain-api.lastmilegig.aagais.co.za
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: blockchain-api-tls
+      hosts:
+        - blockchain-api.lastmilegig.aagais.co.za

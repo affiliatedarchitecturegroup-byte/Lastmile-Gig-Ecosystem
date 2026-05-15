@@ -1,0 +1,131 @@
+# Default values for svc-blockchain
+# See: docs/specs/06_BLOCKCHAIN_LAYER.md
+
+replicaCount: 2
+
+image:
+  repository: lastmilegig/svc-blockchain
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "svc-blockchain"
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "5000"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 5000
+  targetPort: 5000
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: blockchain.lastmilegig.aagais.co.za
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Environment variables (non-secret)
+env:
+  LMG_BLOCKCHAIN_PORT: "5000"
+  LMG_BLOCKCHAIN_CHAIN_ID: "1442"
+  LMG_BLOCKCHAIN_NETWORK_NAME: "polygon-cdk-testnet"
+  LMG_BLOCKCHAIN_ENABLE_GAS_ESTIMATION: "true"
+  LMG_BLOCKCHAIN_MAX_GAS_PRICE_GWEI: "50"
+  LMG_BLOCKCHAIN_TX_TIMEOUT_SECS: "120"
+  LMG_BLOCKCHAIN_CONFIRMATIONS: "2"
+  LMG_BLOCKCHAIN_LOG_LEVEL: "info"
+  RUST_LOG: "svc_blockchain=info,tower_http=info"
+
+# Secret references (from Vault / AWS Secrets Manager)
+secretEnv:
+  - name: LMG_BLOCKCHAIN_SIGNER_PRIVATE_KEY
+    secretName: svc-blockchain-secrets
+    secretKey: signer-private-key
+  - name: LMG_BLOCKCHAIN_POLYGON_RPC_URL
+    secretName: svc-blockchain-secrets
+    secretKey: polygon-rpc-url
+  - name: LMG_BLOCKCHAIN_DELIVERY_VERIFICATION_ADDRESS
+    secretName: svc-blockchain-secrets
+    secretKey: delivery-verification-address
+  - name: LMG_BLOCKCHAIN_DRIVER_PAYOUT_ADDRESS
+    secretName: svc-blockchain-secrets
+    secretKey: driver-payout-address
+  - name: LMG_BLOCKCHAIN_PARTNER_SLA_ADDRESS
+    secretName: svc-blockchain-secrets
+    secretKey: partner-sla-address
+  - name: LMG_BLOCKCHAIN_DRIVER_IDENTITY_ADDRESS
+    secretName: svc-blockchain-secrets
+    secretKey: driver-identity-address
+  - name: LMG_BLOCKCHAIN_KAFKA_BROKERS
+    secretName: kafka-credentials
+    secretKey: brokers
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 5000
+  initialDelaySeconds: 15
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 5000
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
