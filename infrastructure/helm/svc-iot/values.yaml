@@ -1,0 +1,130 @@
+# Default values for svc-iot
+# See: POLYGLOT_ARCHITECTURE.md - Section 2.4
+
+replicaCount: 2
+
+image:
+  repository: lastmilegig/svc-iot
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "svc-iot"
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "5001"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 5001
+  targetPort: 5001
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: iot.lastmilegig.aagais.co.za
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 1Gi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Environment variables
+env:
+  LMG_IOT_PORT: "5001"
+  LMG_IOT_DB_POOL_SIZE: "10"
+  LMG_IOT_MQTT_PORT: "1883"
+  LMG_IOT_MQTT_CLIENT_ID: "lmg-iot-service"
+  LMG_IOT_MQTT_TELEMETRY_TOPIC: "lmg/fleet/+/telemetry"
+  LMG_IOT_MQTT_DIAGNOSTICS_TOPIC: "lmg/fleet/+/diagnostics"
+  LMG_IOT_MQTT_GPS_TOPIC: "lmg/fleet/+/gps"
+  LMG_IOT_ENGINE_TEMP_THRESHOLD_C: "110"
+  LMG_IOT_BATTERY_THRESHOLD_PCT: "15"
+  LMG_IOT_SPEED_THRESHOLD_KMH: "140"
+  LMG_IOT_BATCH_SIZE: "100"
+  LMG_IOT_FLUSH_INTERVAL_MS: "5000"
+  LMG_IOT_RETENTION_DAYS: "90"
+  LMG_IOT_LOG_LEVEL: "info"
+  RUST_LOG: "svc_iot=info,tower_http=info"
+
+# Secret references
+secretEnv:
+  - name: LMG_IOT_DATABASE_URL
+    secretName: svc-iot-secrets
+    secretKey: database-url
+  - name: LMG_IOT_MQTT_BROKER_URL
+    secretName: svc-iot-secrets
+    secretKey: mqtt-broker-url
+  - name: LMG_IOT_KAFKA_BROKERS
+    secretName: kafka-credentials
+    secretKey: brokers
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 5001
+  initialDelaySeconds: 15
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 5001
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Volume mounts for persistent MQTT state
+persistence:
+  enabled: false
+  size: 1Gi
+  storageClass: ""
