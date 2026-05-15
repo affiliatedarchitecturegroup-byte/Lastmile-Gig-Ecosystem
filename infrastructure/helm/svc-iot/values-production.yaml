@@ -1,0 +1,50 @@
+# Production values for svc-iot
+# High-throughput configuration for fleet telemetry ingestion
+
+replicaCount: 4
+
+image:
+  pullPolicy: Always
+
+env:
+  LMG_IOT_PORT: "5001"
+  LMG_IOT_DB_POOL_SIZE: "20"
+  LMG_IOT_BATCH_SIZE: "500"
+  LMG_IOT_FLUSH_INTERVAL_MS: "2000"
+  LMG_IOT_RETENTION_DAYS: "180"
+  LMG_IOT_ENGINE_TEMP_THRESHOLD_C: "105"
+  LMG_IOT_BATTERY_THRESHOLD_PCT: "20"
+  LMG_IOT_SPEED_THRESHOLD_KMH: "130"
+  LMG_IOT_LOG_LEVEL: "warn"
+  RUST_LOG: "svc_iot=warn,tower_http=warn"
+
+resources:
+  limits:
+    cpu: "2"
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 4
+  maxReplicas: 16
+  targetCPUUtilizationPercentage: 55
+  targetMemoryUtilizationPercentage: 70
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "1m"
+  hosts:
+    - host: iot-api.lastmilegig.aagais.co.za
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: iot-api-tls
+      hosts:
+        - iot-api.lastmilegig.aagais.co.za
