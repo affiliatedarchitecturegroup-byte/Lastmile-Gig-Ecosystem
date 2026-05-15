@@ -19,4 +19,7 @@ export * from './models/payment.types';
 export * from './models/sla.types';
 export * from './api/api-response.types';
 export * from './api/pagination.types';
+export * from './models/blockchain.types';
+export * as IoTTypes from './models/iot.types';
 export * from './kafka/kafka-events.types';
+export * from './kafka/blockchain-events.types';

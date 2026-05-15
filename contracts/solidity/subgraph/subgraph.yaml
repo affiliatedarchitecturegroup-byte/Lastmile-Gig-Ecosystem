@@ -1,0 +1,123 @@
+# The Graph Subgraph Manifest
+# Lastmile Gig Blockchain Indexing
+#
+# Indexes DeliveryVerification, DriverPayout, PartnerSLA, and DriverIdentity
+# contracts on Polygon CDK.
+#
+# See: docs/specs/06_BLOCKCHAIN_LAYER.md - Section 4
+
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+
+dataSources:
+  - kind: ethereum
+    name: DeliveryVerification
+    network: polygon-zkevm
+    source:
+      address: "0x0000000000000000000000000000000000000000"
+      abi: DeliveryVerification
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - DeliveryRecord
+        - DeliveryDispute
+        - PlatformStats
+      abis:
+        - name: DeliveryVerification
+          file: ../artifacts/contracts/DeliveryVerification.sol/DeliveryVerification.json
+      eventHandlers:
+        - event: DeliveryRecorded(indexed bytes32,indexed bytes32,indexed bytes32,uint256,bytes32)
+          handler: handleDeliveryRecorded
+        - event: DeliveryDisputed(indexed bytes32,indexed address,uint256)
+          handler: handleDeliveryDisputed
+        - event: DeliveryDisputeResolved(indexed bytes32,bool,indexed address,uint256)
+          handler: handleDeliveryDisputeResolved
+      file: ./src/delivery-verification.ts
+
+  - kind: ethereum
+    name: DriverPayout
+    network: polygon-zkevm
+    source:
+      address: "0x0000000000000000000000000000000000000000"
+      abi: DriverPayout
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PayoutEscrow
+        - PayoutRelease
+        - PayoutRefund
+        - PlatformStats
+      abis:
+        - name: DriverPayout
+          file: ../artifacts/contracts/DriverPayout.sol/DriverPayout.json
+      eventHandlers:
+        - event: EscrowCreated(indexed bytes32,indexed address,uint256,uint256)
+          handler: handleEscrowCreated
+        - event: PayoutReleased(indexed bytes32,indexed address,uint256,uint256)
+          handler: handlePayoutReleased
+        - event: PayoutRefunded(indexed bytes32,indexed address,uint256,string)
+          handler: handlePayoutRefunded
+      file: ./src/driver-payout.ts
+
+  - kind: ethereum
+    name: PartnerSLA
+    network: polygon-zkevm
+    source:
+      address: "0x0000000000000000000000000000000000000000"
+      abi: PartnerSLA
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - SLAContract
+        - SLABreach
+        - SLASuccess
+        - WeeklySettlement
+        - PlatformStats
+      abis:
+        - name: PartnerSLA
+          file: ../artifacts/contracts/PartnerSLA.sol/PartnerSLA.json
+      eventHandlers:
+        - event: SLAContractCreated(indexed bytes32,indexed address,uint256,uint256,uint256)
+          handler: handleSLAContractCreated
+        - event: SLABreachRecorded(indexed bytes32,indexed bytes32,uint256,uint256,uint256)
+          handler: handleSLABreachRecorded
+        - event: SLASuccessRecorded(indexed bytes32,indexed bytes32,uint256,uint256)
+          handler: handleSLASuccessRecorded
+        - event: WeeklySettlementExecuted(indexed bytes32,indexed uint256,uint256,uint256,uint256,int256)
+          handler: handleWeeklySettlement
+      file: ./src/partner-sla.ts
+
+  - kind: ethereum
+    name: DriverIdentity
+    network: polygon-zkevm
+    source:
+      address: "0x0000000000000000000000000000000000000000"
+      abi: DriverIdentity
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - DriverCredential
+        - CredentialRevocation
+        - PlatformStats
+      abis:
+        - name: DriverIdentity
+          file: ../artifacts/contracts/DriverIdentity.sol/DriverIdentity.json
+      eventHandlers:
+        - event: CredentialIssued(indexed bytes32,bytes32,uint256,uint256,uint256)
+          handler: handleCredentialIssued
+        - event: CredentialRevoked(indexed bytes32,string,indexed address,uint256)
+          handler: handleCredentialRevoked
+      file: ./src/driver-identity.ts

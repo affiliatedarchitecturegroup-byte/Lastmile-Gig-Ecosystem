@@ -1,0 +1,159 @@
+# The Graph - Lastmile Gig Blockchain Indexing Schema
+#
+# Indexes all Polygon CDK events from the four smart contracts:
+# DeliveryVerification, DriverPayout, PartnerSLA, DriverIdentity
+#
+# See: docs/specs/06_BLOCKCHAIN_LAYER.md - Section 4
+
+type DeliveryRecord @entity {
+  id: ID!
+  orderId: Bytes!
+  driverId: Bytes!
+  customerId: Bytes!
+  deliveryLat: BigInt!
+  deliveryLng: BigInt!
+  timestamp: BigInt!
+  photoHash: Bytes!
+  signatureHash: Bytes!
+  verified: Boolean!
+  disputed: Boolean!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  recorder: Bytes!
+}
+
+type DeliveryDispute @entity {
+  id: ID!
+  orderId: Bytes!
+  disputedBy: Bytes!
+  timestamp: BigInt!
+  resolved: Boolean!
+  resolvedVerified: Boolean
+  resolvedBy: Bytes
+  resolvedTimestamp: BigInt
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type PayoutEscrow @entity {
+  id: ID!
+  orderId: Bytes!
+  driverWallet: Bytes!
+  amount: BigInt!
+  releaseAfter: BigInt!
+  status: String!
+  createdAt: BigInt!
+  completedAt: BigInt
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type PayoutRelease @entity {
+  id: ID!
+  orderId: Bytes!
+  driverWallet: Bytes!
+  amount: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type PayoutRefund @entity {
+  id: ID!
+  orderId: Bytes!
+  driverWallet: Bytes!
+  amount: BigInt!
+  reason: String!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type SLAContract @entity {
+  id: ID!
+  contractId: Bytes!
+  partnerAddress: Bytes!
+  deliveryTargetMinutes: BigInt!
+  penaltyPerBreachWei: BigInt!
+  bonusPerPerfectWeek: BigInt!
+  status: String!
+  createdAt: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  breaches: [SLABreach!]! @derivedFrom(field: "contract")
+  successes: [SLASuccess!]! @derivedFrom(field: "contract")
+  settlements: [WeeklySettlement!]! @derivedFrom(field: "contract")
+}
+
+type SLABreach @entity {
+  id: ID!
+  contract: SLAContract!
+  orderId: Bytes!
+  actualMinutes: BigInt!
+  targetMinutes: BigInt!
+  week: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type SLASuccess @entity {
+  id: ID!
+  contract: SLAContract!
+  orderId: Bytes!
+  actualMinutes: BigInt!
+  week: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type WeeklySettlement @entity {
+  id: ID!
+  contract: SLAContract!
+  week: BigInt!
+  breachCount: BigInt!
+  penaltyTotal: BigInt!
+  bonusAwarded: BigInt!
+  netSettlement: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type DriverCredential @entity {
+  id: ID!
+  driverId: Bytes!
+  licenceHash: Bytes!
+  issuedAt: BigInt!
+  expiresAt: BigInt!
+  version: BigInt!
+  status: String!
+  issuedBy: Bytes!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  revocations: [CredentialRevocation!]! @derivedFrom(field: "credential")
+}
+
+type CredentialRevocation @entity {
+  id: ID!
+  credential: DriverCredential!
+  driverId: Bytes!
+  reason: String!
+  revokedAt: BigInt!
+  revokedBy: Bytes!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+# Aggregate statistics
+type PlatformStats @entity {
+  id: ID!
+  totalDeliveries: BigInt!
+  totalDisputes: BigInt!
+  totalEscrows: BigInt!
+  totalPayoutsReleased: BigInt!
+  totalAmountReleased: BigInt!
+  activeSLAContracts: BigInt!
+  totalCredentials: BigInt!
+  lastUpdated: BigInt!
+}
