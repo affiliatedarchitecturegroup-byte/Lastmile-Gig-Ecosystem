@@ -4,7 +4,7 @@
 **Repository:** `affiliatedarchitecturegroup-byte/Lastmile-Gig-Ecosystem`  
 **Domain:** `lastmilegig.aagais.co.za`  
 **Parent Entity:** Affiliated Architecture Group (AAG)  
-**Last Updated:** 2026-05-10  
+**Last Updated:** 2026-05-15  
 
 ---
 
@@ -21,8 +21,8 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **Total Phases Defined** | 360+ | 360+ |
 | **Phases Completed** | 0 | 360+ |
 | **Current Phase Group** | A - Foundation | Q - Post-Launch |
-| **Cumulative LoC** | 0 | ~810,000+ |
-| **Source Files Created** | 0 | ~2,500+ |
+| **Cumulative LoC** | 76,750 | ~810,000+ |
+| **Source Files Created** | 55+ | ~2,500+ |
 | **Backend Languages Active** | 0 of 6 | 6 (TS, Python, Go, Rust, Java, Elixir) |
 | **Frontend Frameworks Active** | 0 of 3 | 3 (Next.js, Angular, React Native) |
 | **Test Coverage (avg)** | N/A | 80%+ |
@@ -54,6 +54,20 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | Wave 4 | Complete | Route 53 + CloudFront + WAF + Monitoring (12 files) | 592 | 13,079 |
 | Wave 5 | Complete | SageMaker + Secrets Manager + Helm Charts (9 files) | ~450 | ~13,529 |
 
+### Phase 3 - Intelligence & Enterprise
+
+#### Session 16 (2026-05-15) - Blockchain & IoT Layer Foundation
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Smart Contract Foundation - Hardhat + 4 Solidity contracts + deploy script (11 files) | 1,489 | 70,143 |
+| Wave 2 | Complete | Smart Contract Tests - Full Hardhat/Chai test suite + mocks (7 files) | 1,913 | 72,056 |
+| Wave 3 | Complete | Rust Blockchain Service (svc-blockchain) - Axum API + Kafka consumer (12 files) | 1,785 | 73,841 |
+| Wave 4 | Complete | Rust IoT Telemetry Service (svc-iot) - MQTT + TimescaleDB + alerts (14 files) | 1,471 | 75,312 |
+| Wave 5 | Complete | The Graph subgraph + shared types + blockchain/IoT DB migrations (11 files) | 1,438 | 76,750 |
+
+**Session 16 Total:** 8,096 LoC across 55 files | **Cumulative:** 76,750 LoC
+
 ---
 
 ## Phase Group Progress
@@ -69,7 +83,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **G** | P146-P175 | Order & Dispatch | Not Started | 0/30 |
 | **H** | P176-P205 | Restaurant Storefronts | Not Started | 0/30 |
 | **I** | P206-P225 | Payments | Not Started | 0/20 |
-| **J** | P226-P245 | Blockchain & Security Layer | Not Started | 0/20 |
+| **J** | P226-P245 | Blockchain & IoT Layer | In Progress | 1/20 |
 | **K** | P246-P270 | AI & Agentic Layer | Not Started | 0/25 |
 | **L** | P271-P285 | Enterprise Logistics & ESG | Not Started | 0/15 |
 | **M** | P286-P298 | Communications & Loyalty | Not Started | 0/13 |
@@ -89,9 +103,9 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | 03 | Driver Rental Module | Angular 17, NestJS, Paystack, IoT | Not Started | 0 |
 | 04 | Contracted Fleet Module | Angular 17, Go, Polygon CDK | Not Started | 0 |
 | 05 | Branded Fleet Module | Next.js, Java/Spring Boot, Stripe | Not Started | 0 |
-| 06 | Fleet Servicing Hub | Rust, TimescaleDB, IoT | Not Started | 0 |
+| 06 | Fleet Servicing Hub | Rust, TimescaleDB, IoT | In Progress | 1,471 |
 | 07 | Customer Ordering App | React Native, Expo, AWS Rekognition | Not Started | 0 |
-| 08 | Blockchain Layer | Rust, Polygon CDK, Hardhat | Not Started | 0 |
+| 08 | Blockchain Layer | Rust, Polygon CDK, Hardhat | In Progress | 5,187 |
 | 09 | Security Layer | Auth0, Vault, WAF, Snyk | Not Started | 0 |
 | 10 | Enterprise Logistics | Java, Go, Kafka, Flink | Not Started | 0 |
 | 11 | ESG Framework | Angular, Power BI, CrewAI | Not Started | 0 |
@@ -140,11 +154,13 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | #2 | wave/p001-s1-w3/shared-types-design-tokens | W3 | Types, design tokens, utils | Merged | 1,386 |
 | #3 | wave/p001-s1-w4/backend-scaffolds | W4 | NestJS service scaffolds | Merged | 733 |
 | #4 | wave/p001-s1-w5/database-schemas | W5 | Database schemas + migrations | Pending | ~680 |
+| #5 | wave/p226-s16/blockchain-iot-layer | S16 | Blockchain & IoT Layer (5 waves, 55 files) | Pending | 8,096 |
 
 ---
 
 ## Key Decisions & Notes
 
+- **2026-05-15:** Session 16 completed. Blockchain & IoT layer foundation: 4 Solidity contracts, Hardhat test suite, Rust svc-blockchain (Axum), Rust svc-iot (MQTT/TimescaleDB), The Graph subgraph, shared types, DB migrations. 8,096 LoC across 55 files.
 - **2026-05-10:** Project initialized. All 19 specification documents processed and stored in `docs/specs/`. Governance framework established.
 - **File Size Hard Cap:** 1,800 LoC per source file (standard range: 300-800 LoC, hard cap: 1,800 LoC)
 - **Wave Structure:** Minimum 7 tasks/source files per wave, minimum 5 waves per session
