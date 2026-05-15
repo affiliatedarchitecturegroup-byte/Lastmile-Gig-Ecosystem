@@ -23,3 +23,5 @@ export * from './models/blockchain.types';
 export * as IoTTypes from './models/iot.types';
 export * from './kafka/kafka-events.types';
 export * from './kafka/blockchain-events.types';
+export * from './kafka/ai-events.types';
+export * as AITypes from './models/ai.types';

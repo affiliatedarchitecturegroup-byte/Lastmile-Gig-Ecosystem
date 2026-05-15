@@ -21,8 +21,8 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **Total Phases Defined** | 360+ | 360+ |
 | **Phases Completed** | 0 | 360+ |
 | **Current Phase Group** | A - Foundation | Q - Post-Launch |
-| **Cumulative LoC** | 80,342 | ~810,000+ |
-| **Source Files Created** | 81+ | ~2,500+ |
+| **Cumulative LoC** | 83,576 | ~810,000+ |
+| **Source Files Created** | 129+ | ~2,500+ |
 | **Backend Languages Active** | 0 of 6 | 6 (TS, Python, Go, Rust, Java, Elixir) |
 | **Frontend Frameworks Active** | 0 of 3 | 3 (Next.js, Angular, React Native) |
 | **Test Coverage (avg)** | N/A | 80%+ |
@@ -80,6 +80,18 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 
 **Session 17 Total:** 3,592 LoC across 26 files | **Cumulative:** 80,342 LoC
 
+#### Session 18 (2026-05-15) - AI & Agentic Layer Foundation
+
+| Wave | Status | Description | LoC Added | Cumulative LoC |
+|---|---|---|---|---|
+| Wave 1 | Complete | Python AI Inference Service (svc-ai) - FastAPI, LLM client, RAG, embeddings (17 files) | 1,244 | 81,586 |
+| Wave 2 | Complete | Python Agent Service (svc-agents) - LangGraph, CrewAI, dispatch optimizer, fraud investigator (14 files) | 868 | 82,454 |
+| Wave 3 | Complete | Python Analytics Service (svc-analytics) - metrics, reports, demand forecasting (12 files) | 467 | 82,921 |
+| Wave 4 | Complete | AI shared types (ai.types.ts) + Kafka events (ai-events.types.ts) (3 files) | 345 | 83,266 |
+| Wave 5 | Complete | AI database migration (012) + ADR-003 architecture decision record (2 files) | 310 | 83,576 |
+
+**Session 18 Total:** 3,234 LoC across 48 files | **Cumulative:** 83,576 LoC
+
 ---
 
 ## Phase Group Progress
@@ -96,7 +108,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | **H** | P176-P205 | Restaurant Storefronts | Not Started | 0/30 |
 | **I** | P206-P225 | Payments | Not Started | 0/20 |
 | **J** | P226-P245 | Blockchain & IoT Layer | In Progress | 2/20 |
-| **K** | P246-P270 | AI & Agentic Layer | Not Started | 0/25 |
+| **K** | P246-P270 | AI & Agentic Layer | In Progress | 1/25 |
 | **L** | P271-P285 | Enterprise Logistics & ESG | Not Started | 0/15 |
 | **M** | P286-P298 | Communications & Loyalty | Not Started | 0/13 |
 | **N** | P299-P308 | Developer Portal & Insurance | Not Started | 0/10 |
@@ -111,7 +123,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | # | Module | Primary Stack | Status | LoC |
 |---|---|---|---|---|
 | 01 | Corporate Landing & Investor Relations | Next.js 14, Sanity, Auth0 | Not Started | 0 |
-| 02 | AI Orchestration Platform | Python, LangChain, CrewAI, Kafka | Not Started | 0 |
+| 02 | AI Orchestration Platform | Python, LangChain, CrewAI, Kafka | In Progress | 868 |
 | 03 | Driver Rental Module | Angular 17, NestJS, Paystack, IoT | Not Started | 0 |
 | 04 | Contracted Fleet Module | Angular 17, Go, Polygon CDK | Not Started | 0 |
 | 05 | Branded Fleet Module | Next.js, Java/Spring Boot, Stripe | Not Started | 0 |
@@ -122,7 +134,7 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | 10 | Enterprise Logistics | Java, Go, Kafka, Flink | Not Started | 0 |
 | 11 | ESG Framework | Angular, Power BI, CrewAI | Not Started | 0 |
 | 12 | APIs & Integrations Hub | NestJS, AWS API Gateway | Not Started | 0 |
-| 13 | AI & Data Intelligence | Python, SageMaker, LangGraph, Pinecone | Not Started | 0 |
+| 13 | AI & Data Intelligence | Python, SageMaker, LangGraph, Pinecone | In Progress | 1,711 |
 | 14 | Admin & Compliance | Angular, NestJS, Supabase | Not Started | 0 |
 | 15 | Restaurant Storefronts | Next.js, Sanity, Cloudinary, Elixir | Not Started | 0 |
 | 16 | Driver Earnings & Wallet | Angular, Java, Paystack, Ozow | Not Started | 0 |
@@ -168,11 +180,13 @@ Lastmile Gig is a polyglot microservices platform for South Africa's last-mile d
 | #4 | wave/p001-s1-w5/database-schemas | W5 | Database schemas + migrations | Pending | ~680 |
 | #5 | wave/p226-s16/blockchain-iot-layer | S16 | Blockchain & IoT Layer (5 waves, 55 files) | Pending | 8,096 |
 | #6 | wave/p226-s17/blockchain-iot-integration | S17 | Blockchain & IoT Integration (5 waves, 26 files) | Pending | 3,592 |
+| #7 | wave/p246-s18/ai-agentic-layer | S18 | AI & Agentic Layer Foundation (5 waves, 48 files) | Pending | 3,234 |
 
 ---
 
 ## Key Decisions & Notes
 
+- **2026-05-15:** Session 18 completed. AI & Agentic layer foundation: svc-ai (FastAPI, LLM client, RAG, embeddings), svc-agents (LangGraph, CrewAI, dispatch optimizer, fraud investigator), svc-analytics (metrics, reports, forecasting), shared types, DB migration 012. 3,234 LoC across 48 files.
 - **2026-05-15:** Session 17 completed. Blockchain & IoT integration: Solidity libraries, contract interfaces, deployment scripts, Rust tx manager, event indexer, geofence engine, batch processor, Helm charts, CI/CD workflows, ADR-002. 3,592 LoC across 26 files.
 - **2026-05-15:** Session 16 completed. Blockchain & IoT layer foundation: 4 Solidity contracts, Hardhat test suite, Rust svc-blockchain (Axum), Rust svc-iot (MQTT/TimescaleDB), The Graph subgraph, shared types, DB migrations. 8,096 LoC across 55 files.
 - **2026-05-10:** Project initialized. All 19 specification documents processed and stored in `docs/specs/`. Governance framework established.
